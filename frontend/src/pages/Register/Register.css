@@ -9,7 +9,7 @@
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 50px;
-  background-color: white;
+  background-color: rgb(94, 222, 96);
   border-radius: 15px;
   overflow: hidden;
   box-shadow: var(--shadow);
@@ -70,7 +70,7 @@
 }
 
 .register-info {
-  background: linear-gradient(135deg, var(--secondary-color), #36d1dc);
+  background: linear-gradient(135deg, var(--secondary-color), #4fc5cd);
   color: white;
   padding: 40px;
   display: flex;

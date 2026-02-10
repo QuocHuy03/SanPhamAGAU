@@ -1,13 +1,14 @@
 import axios from 'axios';
 import { toast } from 'react-hot-toast';
 
-// Create axios instance
+// Create axios instance - SỬA BASE URL
 const api = axios.create({
-  baseURL: process.env.REACT_APP_API_URL || 'http://localhost:5000/api',
-  timeout: 10000,
+  baseURL: process.env.REACT_APP_API_URL || 'http://localhost:6000/api',
+  timeout: 15000, // Tăng timeout
   headers: {
     'Content-Type': 'application/json',
   },
+  withCredentials: true, // Thêm dòng này nếu dùng cookies
 });
 
 // Request interceptor
@@ -17,9 +18,13 @@ api.interceptors.request.use(
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
+    
+    // Log request cho debug
+    console.log(`🌐 API Request: ${config.method?.toUpperCase()} ${config.baseURL}${config.url}`);
     return config;
   },
   (error) => {
+    console.error('❌ Request error:', error);
     return Promise.reject(error);
   }
 );
@@ -27,20 +32,28 @@ api.interceptors.request.use(
 // Response interceptor
 api.interceptors.response.use(
   (response) => {
+    console.log(`✅ API Response: ${response.status} ${response.config.url}`);
     return response.data;
   },
   (error) => {
-    const { response } = error;
+    const { response, request, message } = error;
+    
+    console.error('❌ API Error:', {
+      url: error.config?.url,
+      status: response?.status,
+      message: message,
+      data: response?.data
+    });
     
     if (response) {
-      // Handle specific status codes
       switch (response.status) {
         case 401:
-          // Unauthorized - clear token and redirect to login
           localStorage.removeItem('token');
           localStorage.removeItem('user');
-          window.location.href = '/login';
-          toast.error('Phiên đăng nhập đã hết hạn');
+          if (window.location.pathname !== '/login') {
+            window.location.href = '/login';
+            toast.error('Phiên đăng nhập đã hết hạn');
+          }
           break;
           
         case 403:
@@ -56,16 +69,17 @@ api.interceptors.response.use(
           break;
           
         default:
-          if (response.data && response.data.message) {
+          if (response.data?.message) {
             toast.error(response.data.message);
-          } else {
-            toast.error('Đã xảy ra lỗi');
           }
       }
-    } else if (error.code === 'ECONNABORTED') {
-      toast.error('Yêu cầu quá thời gian chờ');
-    } else if (error.message === 'Network Error') {
+    } else if (request && !response) {
+      // Network error
+      toast.error('Không thể kết nối đến máy chủ. Vui lòng kiểm tra kết nối mạng.');
+    } else if (message === 'Network Error') {
       toast.error('Không thể kết nối đến máy chủ');
+    } else if (message.includes('timeout')) {
+      toast.error('Yêu cầu quá thời gian chờ');
     }
     
     return Promise.reject(error);
