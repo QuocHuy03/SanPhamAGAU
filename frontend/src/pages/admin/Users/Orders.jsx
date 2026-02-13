@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { FaEye, FaTruck, FaCheckCircle, FaTimesCircle } from 'react-icons/fa';
-import { orderService } from '../../services/orderService';
-import LoadingSpinner from '../../components/common/LoadingSpinner/LoadingSpinner';
-import { formatCurrency, formatDate } from '../../utils/helpers';
-import { ORDER_STATUS } from '../../utils/constants';
+import { orderService } from '../../../services/orderService';
+import LoadingSpinner from '../../../components/common/LoadingSpinner/LoadingSpinner';
+import { formatCurrency, formatDate } from '../../../utils/helpers';
+import { ORDER_STATUS } from '../../../utils/constants';
 import './Orders.css';
 
 const UserOrders = () => {

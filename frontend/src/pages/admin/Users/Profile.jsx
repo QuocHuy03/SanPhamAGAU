@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { FaUser, FaEnvelope, FaPhone, FaMapMarkerAlt, FaSave } from 'react-icons/fa';
-import { authService } from '../../services/authService';
-import { updateUser } from '../../store/slices/authSlice';
-import LoadingSpinner from '../../components/common/LoadingSpinner/LoadingSpinner';
-import { validateUserForm } from '../../utils/validators';
+import { authService } from '../../../services/authService';
+import { updateUser } from '../../../store/slices/authSlice';
+import LoadingSpinner from '../../../components/common/LoadingSpinner/LoadingSpinner';
+import { validateUserForm } from '../../../utils/validators';
 import './Profile.css';
 
 const UserProfile = () => {
