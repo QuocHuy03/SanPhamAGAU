@@ -1,0 +1,43 @@
+.admin-settings {
+    font-family: 'Open Sans', sans-serif;
+}
+
+.settings-container {
+    background: var(--white);
+    padding: var(--space-8);
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow-md);
+    max-width: 800px;
+}
+
+.form-section {
+    margin-bottom: var(--space-8);
+    padding-bottom: var(--space-6);
+    border-bottom: 1px solid var(--gray-300);
+}
+
+.form-section h3 {
+    margin-bottom: var(--space-4);
+    color: var(--primary-color);
+    font-size: 1.25rem;
+}
+
+.form-section:last-child {
+    border-bottom: none;
+}
+
+.btn-save {
+    background: var(--primary-gradient);
+    color: var(--white);
+    padding: var(--space-3) var(--space-8);
+    border: none;
+    border-radius: var(--radius-lg);
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+
+.btn-save:hover {
+    transform: translateY(-2px);
+}

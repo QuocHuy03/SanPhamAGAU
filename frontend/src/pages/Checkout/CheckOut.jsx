@@ -6,7 +6,7 @@ import './CheckOut.css';
 const CheckOut = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const { items } = useSelector((state) => state.cart); // ✅ Sửa ở đây
+  const { items } = useSelector((state) => state.cart);
   const { user } = useSelector((state) => state.auth);
 
   const [formData, setFormData] = useState({
@@ -28,30 +28,28 @@ const CheckOut = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    
-    // Kiểm tra giỏ hàng
-    if (!items || items.length === 0) { // ✅ Sửa ở đây
+
+    if (!items || items.length === 0) {
       alert('Giỏ hàng trống!');
       navigate('/cart');
       return;
     }
 
-    // Xử lý đặt hàng
     const orderData = {
       ...formData,
-      items: items, // ✅ Sửa ở đây
+      items: items,
       totalAmount: calculateTotal(),
       orderDate: new Date().toISOString()
     };
 
     console.log('Đơn hàng:', orderData);
-    
+
     alert('Đặt hàng thành công!');
     navigate('/orders');
   };
 
   const calculateSubtotal = () => {
-    return items?.reduce((sum, item) => sum + (item.price * item.quantity), 0) || 0; // ✅ Sửa ở đây
+    return items?.reduce((sum, item) => sum + (item.price * item.quantity), 0) || 0;
   };
 
   const calculateTotal = () => {
@@ -62,18 +60,16 @@ const CheckOut = () => {
 
   const shippingFee = calculateSubtotal() > 500000 ? 0 : 30000;
 
-  // Nếu giỏ hàng trống, hiển thị thông báo
   if (!items || items.length === 0) {
     return (
       <div className="checkout-container">
         <h1>Thanh toán đơn hàng</h1>
-        <div className="empty-cart" style={{ textAlign: 'center', padding: '50px' }}>
+        <div className="empty-cart">
           <h2>Giỏ hàng trống</h2>
           <p>Bạn chưa có sản phẩm nào trong giỏ hàng.</p>
-          <button 
+          <button
             onClick={() => navigate('/shop')}
             className="btn-primary"
-            style={{ padding: '10px 20px', cursor: 'pointer' }}
           >
             Mua sắm ngay
           </button>
@@ -85,12 +81,11 @@ const CheckOut = () => {
   return (
     <div className="checkout-container">
       <h1>Thanh toán đơn hàng</h1>
-      
+
       <div className="checkout-content">
         <div className="checkout-form">
           <h2>Thông tin giao hàng</h2>
           <form onSubmit={handleSubmit}>
-            {/* Form fields - giữ nguyên */}
             <div className="form-group">
               <label>Họ và tên *</label>
               <input
@@ -99,6 +94,7 @@ const CheckOut = () => {
                 value={formData.fullName}
                 onChange={handleChange}
                 required
+                placeholder="Nhập họ và tên"
               />
             </div>
 
@@ -110,6 +106,7 @@ const CheckOut = () => {
                 value={formData.email}
                 onChange={handleChange}
                 required
+                placeholder="example@email.com"
               />
             </div>
 
@@ -121,6 +118,7 @@ const CheckOut = () => {
                 value={formData.phone}
                 onChange={handleChange}
                 required
+                placeholder="0123456789"
               />
             </div>
 
@@ -157,8 +155,8 @@ const CheckOut = () => {
 
             <div className="form-group">
               <label>Phương thức thanh toán *</label>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                <label style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+              <div className="payment-methods">
+                <label className={`payment-option ${formData.paymentMethod === 'cod' ? 'selected' : ''}`}>
                   <input
                     type="radio"
                     name="paymentMethod"
@@ -166,9 +164,9 @@ const CheckOut = () => {
                     checked={formData.paymentMethod === 'cod'}
                     onChange={handleChange}
                   />
-                  <span>Thanh toán khi nhận hàng (COD)</span>
+                  <span>Trả tiền khi nhận hàng</span>
                 </label>
-                <label style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <label className={`payment-option ${formData.paymentMethod === 'banking' ? 'selected' : ''}`}>
                   <input
                     type="radio"
                     name="paymentMethod"
@@ -178,7 +176,7 @@ const CheckOut = () => {
                   />
                   <span>Chuyển khoản ngân hàng</span>
                 </label>
-                <label style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <label className={`payment-option ${formData.paymentMethod === 'momo' ? 'selected' : ''}`}>
                   <input
                     type="radio"
                     name="paymentMethod"
@@ -199,26 +197,10 @@ const CheckOut = () => {
                 onChange={handleChange}
                 rows="3"
                 placeholder="Ghi chú về đơn hàng, ví dụ: giao hàng giờ hành chính"
-                style={{ width: '100%', padding: '10px', borderRadius: '4px', border: '1px solid #ddd' }}
               />
             </div>
 
-            <button 
-              type="submit" 
-              className="checkout-btn"
-              style={{
-                width: '100%',
-                padding: '15px',
-                backgroundColor: '#4CAF50',
-                color: 'white',
-                border: 'none',
-                borderRadius: '4px',
-                fontSize: '16px',
-                fontWeight: '600',
-                cursor: 'pointer',
-                marginTop: '20px'
-              }}
-            >
+            <button type="submit" className="checkout-btn">
               Đặt hàng
             </button>
           </form>
@@ -226,42 +208,44 @@ const CheckOut = () => {
 
         <div className="order-summary">
           <h2>Đơn hàng của bạn</h2>
-          
+
           <div className="cart-items">
             {items.map(item => (
-              <div key={item.id} className="cart-item" style={{ display: 'flex', justifyContent: 'space-between', padding: '10px 0', borderBottom: '1px solid #eee' }}>
-                <div>
+              <div key={item.id} className="cart-item">
+                <div className="cart-item-info">
                   <span className="item-name">{item.name}</span>
-                  {item.size && <span style={{ marginLeft: '10px', color: '#666' }}>Size: {item.size}</span>}
-                  {item.color && <span style={{ marginLeft: '10px', color: '#666' }}>Màu: {item.color.name}</span>}
-                  <span className="item-quantity" style={{ marginLeft: '10px', color: '#999' }}>x{item.quantity}</span>
+                  <div className="item-meta">
+                    {item.size && <span>Size: {item.size}</span>}
+                    {item.color && <span>Màu: {item.color.name}</span>}
+                    <span className="item-quantity">x{item.quantity}</span>
+                  </div>
                 </div>
-                <span className="item-price" style={{ fontWeight: '600' }}>
+                <span className="item-price">
                   {(item.price * item.quantity).toLocaleString()}đ
                 </span>
               </div>
             ))}
           </div>
-          
-          <div className="summary-details" style={{ marginTop: '20px', borderTop: '2px solid #eee', paddingTop: '20px' }}>
-            <div className="summary-row" style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px' }}>
+
+          <div className="summary-details">
+            <div className="summary-row">
               <span>Tạm tính</span>
               <span>{calculateSubtotal().toLocaleString()}đ</span>
             </div>
-            <div className="summary-row" style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px' }}>
+            <div className="summary-row">
               <span>Phí vận chuyển</span>
-              <span style={{ color: shippingFee === 0 ? '#4CAF50' : 'inherit' }}>
+              <span style={{ color: shippingFee === 0 ? 'var(--success)' : 'inherit' }}>
                 {shippingFee === 0 ? 'Miễn phí' : `${shippingFee.toLocaleString()}đ`}
               </span>
             </div>
             {shippingFee === 0 && (
-              <div style={{ color: '#4CAF50', fontSize: '14px', marginBottom: '10px' }}>
-                🎉 Miễn phí vận chuyển cho đơn hàng từ 500,000đ
+              <div className="free-shipping-badge">
+                Miễn phí vận chuyển cho đơn hàng từ 500,000đ
               </div>
             )}
-            <div className="summary-row total" style={{ display: 'flex', justifyContent: 'space-between', marginTop: '15px', paddingTop: '15px', borderTop: '2px solid #ddd', fontSize: '18px', fontWeight: '600' }}>
+            <div className="summary-row total">
               <span>Tổng cộng</span>
-              <span style={{ color: '#4CAF50' }}>{calculateTotal().toLocaleString()}đ</span>
+              <span>{calculateTotal().toLocaleString()}đ</span>
             </div>
           </div>
         </div>

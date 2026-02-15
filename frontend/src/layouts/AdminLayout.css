@@ -89,7 +89,8 @@
 
 .user-role {
   font-size: 12px;
-  opacity: 0.8;
+  color: #ffffff;
+  opacity: 1;
   white-space: nowrap;
 }
 
@@ -102,7 +103,7 @@
   display: flex;
   align-items: center;
   padding: 12px 20px;
-  color: rgba(255, 255, 255, 0.8);
+  color: #ffffff;
   text-decoration: none;
   transition: all 0.3s;
   position: relative;
@@ -137,7 +138,7 @@
   width: 100%;
   border: none;
   background: none;
-  color: rgba(255, 255, 255, 0.8);
+  color: #ffffff;
   cursor: pointer;
   font-size: 16px;
 }
@@ -202,11 +203,11 @@
   .admin-sidebar {
     transform: translateX(-100%);
   }
-  
+
   .admin-sidebar.mobile-open {
     transform: translateX(0);
   }
-  
+
   .mobile-overlay {
     position: fixed;
     top: 0;
@@ -216,15 +217,15 @@
     background: rgba(0, 0, 0, 0.5);
     z-index: 999;
   }
-  
+
   .admin-main {
     margin-left: 0 !important;
   }
-  
+
   .mobile-menu-toggle {
     display: block;
   }
-  
+
   .sidebar-toggle {
     display: none;
   }
@@ -234,15 +235,15 @@
   .admin-header {
     padding: 15px 20px;
   }
-  
+
   .admin-content {
     padding: 20px;
   }
-  
+
   .page-title {
     font-size: 20px;
   }
-  
+
   .welcome-text {
     display: none;
   }

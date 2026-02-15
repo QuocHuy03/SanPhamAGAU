@@ -18,6 +18,12 @@ app.use(express.urlencoded({ extended: true }));
 app.use(mongoSanitize());
 app.use(xssClean());
 
+// Debug logging
+app.use((req, res, next) => {
+  console.log(`[${new Date().toISOString()}] ${req.method} ${req.url}`);
+  next();
+});
+
 // Rate limiting
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 phút
@@ -36,7 +42,7 @@ connectDB().then(() => {
 // ========== ROUTES ==========
 // Test routes
 app.get('/', (req, res) => {
-  res.json({ 
+  res.json({
     message: '🛒 E-commerce API is running',
     version: '1.0.0',
     timestamp: new Date().toISOString(),
@@ -58,10 +64,14 @@ app.get('/api/health', (req, res) => {
   });
 });
 
-// Import và sử dụng các routes - THÊM NHỮNG DÒNG NÀY
+// Import và sử dụng các routes
 app.use('/api/auth', require('./src/routes/authRoutes'));
 app.use('/api/admin', require('./src/routes/adminRoutes'));
 app.use('/api/users', require('./src/routes/userRoutes'));
+app.use('/api/products', require('./src/routes/productRoutes'));
+app.use('/api/categories', require('./src/routes/categoryRoutes'));
+app.use('/api/orders', require('./src/routes/orderRoutes'));
+app.use('/api/cart', require('./src/routes/cartRoutes'));
 
 // 404 handler
 app.use('*', (req, res) => {
@@ -75,7 +85,7 @@ app.use('*', (req, res) => {
 app.use(errorMiddleware);
 
 // ========== START SERVER ==========
-const PORT = process.env.PORT || 6000;
+const PORT = process.env.PORT || 2000;
 const HOST = '0.0.0.0';
 
 app.listen(PORT, HOST, () => {
@@ -87,10 +97,5 @@ app.listen(PORT, HOST, () => {
   console.log(`🔗 Network: http://${HOST}:${PORT}`);
   console.log(`📅 Time: ${new Date().toLocaleString()}`);
   console.log('='.repeat(60));
-  console.log('\n📋 Test URLs:');
-  console.log(`1. http://localhost:${PORT}`);
-  console.log(`2. http://localhost:${PORT}/api/health`);
-  console.log(`3. http://localhost:${PORT}/api/auth/test`);
-  console.log(`4. http://localhost:${PORT}/api/admin/dashboard`);
   console.log(`\n⚡ Use Ctrl+C to stop the server\n`);
 });

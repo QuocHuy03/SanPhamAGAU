@@ -1,14 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { 
-  FaSearch, 
-  FaFilter,
-  FaEye,
-  FaCheckCircle,
-  FaTimesCircle,
-  FaTruck,
-  FaBox
-} from 'react-icons/fa';
 import { adminService } from '../../../services/adminService';
 import LoadingSpinner from '../../../components/common/LoadingSpinner/LoadingSpinner';
 import { formatCurrency, formatDate } from '../../../utils/helpers';
@@ -40,7 +31,7 @@ const AdminOrders = () => {
         status: selectedStatus,
         date: selectedDate
       });
-      
+
       setOrders(response.orders || []);
       setPagination(prev => ({
         ...prev,
@@ -65,8 +56,8 @@ const AdminOrders = () => {
   const filteredOrders = orders.filter(order => {
     if (!searchTerm) return true;
     return order.orderCode?.includes(searchTerm) ||
-           order.customer?.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-           order.customer?.email?.toLowerCase().includes(searchTerm.toLowerCase());
+      order.customer?.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      order.customer?.email?.toLowerCase().includes(searchTerm.toLowerCase());
   });
 
   if (loading) {
@@ -100,7 +91,7 @@ const AdminOrders = () => {
       {/* Filters */}
       <div className="orders-filters">
         <div className="search-box">
-          <FaSearch className="search-icon" />
+          <span className="search-icon">🔍</span>
           <input
             type="text"
             placeholder="Tìm kiếm theo mã đơn, tên khách hàng..."
@@ -111,7 +102,7 @@ const AdminOrders = () => {
 
         <div className="filter-group">
           <div className="filter-box">
-            <FaFilter className="filter-icon" />
+            <span className="filter-icon">🌪️</span>
             <select
               value={selectedStatus}
               onChange={(e) => setSelectedStatus(e.target.value)}
@@ -166,7 +157,7 @@ const AdminOrders = () => {
                 <td>{formatDate(order.createdAt)}</td>
                 <td>
                   <div className="order-items-summary">
-                    <FaBox />
+                    <span>📦</span>
                     <span>{order.items?.length || 0} sản phẩm</span>
                   </div>
                 </td>
@@ -190,34 +181,38 @@ const AdminOrders = () => {
                   </select>
                 </td>
                 <td className="actions-cell">
-                  <Link 
-                    to={`/admin/orders/${order._id}`} 
+                  <Link
+                    to={`/admin/orders/${order._id}`}
                     className="btn-icon view"
+                    title="Xem chi tiết"
                   >
-                    <FaEye />
+                    👁️
                   </Link>
                   {order.status === 'pending' && (
-                    <button 
+                    <button
                       className="btn-icon cancel"
                       onClick={() => handleStatusChange(order._id, 'cancelled')}
+                      title="Hủy đơn"
                     >
-                      <FaTimesCircle />
+                      ❌
                     </button>
                   )}
                   {order.status === 'confirmed' && (
-                    <button 
+                    <button
                       className="btn-icon ship"
                       onClick={() => handleStatusChange(order._id, 'shipped')}
+                      title="Giao hàng"
                     >
-                      <FaTruck />
+                      🚚
                     </button>
                   )}
                   {order.status === 'shipped' && (
-                    <button 
+                    <button
                       className="btn-icon deliver"
                       onClick={() => handleStatusChange(order._id, 'delivered')}
+                      title="Hoàn thành"
                     >
-                      <FaCheckCircle />
+                      ✅
                     </button>
                   )}
                 </td>

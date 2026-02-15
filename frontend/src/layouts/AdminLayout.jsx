@@ -1,19 +1,6 @@
 import React, { useState } from 'react';
 import { Outlet, Link, useNavigate } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
-import { 
-  FaTachometerAlt, 
-  FaBoxes, 
-  FaShoppingCart, 
-  FaUsers, 
-  FaTags,
-  FaCog,
-  FaSignOutAlt,
-  FaBars,
-  FaTimes,
-  FaChevronLeft,
-  FaChevronRight
-} from 'react-icons/fa';
 import { logout } from '../store/slices/authSlice';
 import './AdminLayout.css';
 
@@ -29,13 +16,26 @@ const AdminLayout = () => {
     navigate('/login');
   };
 
+  React.useEffect(() => {
+    if (!user) {
+      navigate('/login');
+    } else if (user.role !== 'admin') {
+      alert('Bạn không có quyền truy cập trang quản trị!');
+      navigate('/');
+    }
+  }, [user, navigate]);
+
+  if (!user || user.role !== 'admin') {
+    return null; // Or a loading spinner
+  }
+
   const menuItems = [
-    { path: '/admin/dashboard', name: 'Dashboard', icon: <FaTachometerAlt /> },
-    { path: '/admin/products', name: 'Quản lý sản phẩm', icon: <FaBoxes /> },
-    { path: '/admin/orders', name: 'Quản lý đơn hàng', icon: <FaShoppingCart /> },
-    { path: '/admin/users', name: 'Quản lý người dùng', icon: <FaUsers /> },
-    { path: '/admin/categories', name: 'Danh mục', icon: <FaTags /> },
-    { path: '/admin/settings', name: 'Cài đặt', icon: <FaCog /> },
+    { path: '/admin/dashboard', name: 'Dashboard' },
+    { path: '/admin/products', name: 'Quản lý sản phẩm' },
+    { path: '/admin/orders', name: 'Quản lý đơn hàng' },
+    { path: '/admin/users', name: 'Quản lý người dùng' },
+    { path: '/admin/categories', name: 'Danh mục' },
+    { path: '/admin/settings', name: 'Cài đặt' },
   ];
 
   return (
@@ -51,11 +51,11 @@ const AdminLayout = () => {
           <Link to="/admin" className="sidebar-logo">
             {isSidebarOpen ? 'Admin Panel' : 'AP'}
           </Link>
-          <button 
+          <button
             className="sidebar-toggle"
             onClick={() => setIsSidebarOpen(!isSidebarOpen)}
           >
-            {isSidebarOpen ? <FaChevronLeft /> : <FaChevronRight />}
+            {isSidebarOpen ? '◀' : '▶'}
           </button>
         </div>
 
@@ -79,16 +79,16 @@ const AdminLayout = () => {
               className="nav-item"
               onClick={() => setIsMobileMenuOpen(false)}
             >
-              <span className="nav-icon">{item.icon}</span>
-              {isSidebarOpen && <span className="nav-text">{item.name}</span>}
+              {isSidebarOpen && <span className="nav-text" style={{ marginLeft: 0 }}>{item.name}</span>}
+              {!isSidebarOpen && <span className="nav-text-collapsed" style={{ fontSize: '20px', marginLeft: 'auto', marginRight: 'auto' }}>{item.name.charAt(0)}</span>}
             </Link>
           ))}
         </nav>
 
         <div className="sidebar-footer">
           <button className="nav-item logout-btn" onClick={handleLogout}>
-            <span className="nav-icon"><FaSignOutAlt /></span>
-            {isSidebarOpen && <span className="nav-text">Đăng xuất</span>}
+            {isSidebarOpen && <span className="nav-text" style={{ marginLeft: 0 }}>Đăng xuất</span>}
+            {!isSidebarOpen && <span className="nav-text-collapsed" style={{ fontSize: '20px', marginLeft: 'auto', marginRight: 'auto' }}>🚪</span>}
           </button>
         </div>
       </aside>
@@ -96,11 +96,11 @@ const AdminLayout = () => {
       {/* Main Content */}
       <div className="admin-main">
         <header className="admin-header">
-          <button 
+          <button
             className="mobile-menu-toggle"
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
           >
-            {isMobileMenuOpen ? <FaTimes /> : <FaBars />}
+            {isMobileMenuOpen ? '✕' : '☰'}
           </button>
           <h1 className="page-title">Dashboard</h1>
           <div className="header-actions">

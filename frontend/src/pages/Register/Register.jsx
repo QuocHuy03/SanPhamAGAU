@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { FaUser, FaEnvelope, FaLock, FaPhone } from 'react-icons/fa';
 import { authService } from '../../services/authService';
 import './Register.css';
 
@@ -29,52 +28,52 @@ const Register = () => {
 
   const validateForm = () => {
     const newErrors = {};
-    
+
     if (!formData.name) {
       newErrors.name = 'Họ tên là bắt buộc';
     }
-    
+
     if (!formData.email) {
       newErrors.email = 'Email là bắt buộc';
     } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
       newErrors.email = 'Email không hợp lệ';
     }
-    
+
     if (!formData.password) {
       newErrors.password = 'Mật khẩu là bắt buộc';
     } else if (formData.password.length < 6) {
       newErrors.password = 'Mật khẩu phải có ít nhất 6 ký tự';
     }
-    
+
     if (!formData.confirmPassword) {
       newErrors.confirmPassword = 'Xác nhận mật khẩu là bắt buộc';
     } else if (formData.password !== formData.confirmPassword) {
       newErrors.confirmPassword = 'Mật khẩu không khớp';
     }
-    
+
     if (!formData.phone) {
       newErrors.phone = 'Số điện thoại là bắt buộc';
     } else if (!/^\d{10,11}$/.test(formData.phone)) {
       newErrors.phone = 'Số điện thoại không hợp lệ';
     }
-    
+
     return newErrors;
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     const validationErrors = validateForm();
     if (Object.keys(validationErrors).length > 0) {
       setErrors(validationErrors);
       return;
     }
-    
+
     try {
       setLoading(true);
       await authService.register(formData);
-      
-      navigate('/login', { 
+
+      navigate('/login', {
         state: { message: 'Đăng ký thành công! Vui lòng đăng nhập.' }
       });
     } catch (error) {
@@ -92,17 +91,17 @@ const Register = () => {
         <div className="register-wrapper">
           <div className="register-form-container">
             <h1 className="register-title">Đăng ký tài khoản</h1>
-            
+
             {errors.submit && (
               <div className="alert alert-danger">
                 {errors.submit}
               </div>
             )}
-            
+
             <form onSubmit={handleSubmit} className="register-form">
               <div className="form-group">
                 <label htmlFor="name" className="form-label">
-                  <FaUser /> Họ và tên
+                  Họ và tên
                 </label>
                 <input
                   type="text"
@@ -117,10 +116,10 @@ const Register = () => {
                   <span className="error-message">{errors.name}</span>
                 )}
               </div>
-              
+
               <div className="form-group">
                 <label htmlFor="email" className="form-label">
-                  <FaEnvelope /> Email
+                  Email
                 </label>
                 <input
                   type="email"
@@ -135,11 +134,11 @@ const Register = () => {
                   <span className="error-message">{errors.email}</span>
                 )}
               </div>
-              
+
               <div className="form-row">
                 <div className="form-group">
                   <label htmlFor="password" className="form-label">
-                    <FaLock /> Mật khẩu
+                    Mật khẩu
                   </label>
                   <input
                     type="password"
@@ -154,10 +153,10 @@ const Register = () => {
                     <span className="error-message">{errors.password}</span>
                   )}
                 </div>
-                
+
                 <div className="form-group">
                   <label htmlFor="confirmPassword" className="form-label">
-                    <FaLock /> Xác nhận mật khẩu
+                    Xác nhận mật khẩu
                   </label>
                   <input
                     type="password"
@@ -173,10 +172,10 @@ const Register = () => {
                   )}
                 </div>
               </div>
-              
+
               <div className="form-group">
                 <label htmlFor="phone" className="form-label">
-                  <FaPhone /> Số điện thoại
+                  Số điện thoại
                 </label>
                 <input
                   type="tel"
@@ -191,49 +190,29 @@ const Register = () => {
                   <span className="error-message">{errors.phone}</span>
                 )}
               </div>
-              
+
               <div className="form-agreement">
                 <label className="agreement-checkbox">
                   <input type="checkbox" required />
                   <span>Tôi đồng ý với <Link to="/terms">Điều khoản dịch vụ</Link> và <Link to="/privacy">Chính sách bảo mật</Link></span>
                 </label>
               </div>
-              
-              <button 
-                type="submit" 
+
+              <button
+                type="submit"
                 className="btn-primary register-btn"
                 disabled={loading}
               >
                 {loading ? 'Đang đăng ký...' : 'Đăng ký'}
               </button>
-              
+
               <div className="login-link">
                 <p>Đã có tài khoản? <Link to="/login">Đăng nhập ngay</Link></p>
               </div>
             </form>
           </div>
-          
-          <div className="register-info">
-            <h2>Tại sao nên đăng ký?</h2>
-            <ul className="benefits-list">
-              <li>
-                <strong>Mua sắm nhanh chóng</strong>
-                <p>Lưu thông tin và thanh toán chỉ với vài cú click</p>
-              </li>
-              <li>
-                <strong>Theo dõi đơn hàng</strong>
-                <p>Cập nhật trạng thái đơn hàng 24/7</p>
-              </li>
-              <li>
-                <strong>Ưu đãi đặc biệt</strong>
-                <p>Nhận voucher và khuyến mãi dành riêng cho thành viên</p>
-              </li>
-              <li>
-                <strong>Lưu sản phẩm yêu thích</strong>
-                <p>Tạo danh sách sản phẩm yêu thích để mua sau</p>
-              </li>
-            </ul>
-          </div>
+
+
         </div>
       </div>
     </div>

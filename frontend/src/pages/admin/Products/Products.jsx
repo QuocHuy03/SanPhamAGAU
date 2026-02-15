@@ -1,13 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { 
-  FaPlus, 
-  FaEdit, 
-  FaTrash, 
-  FaEye,
-  FaSearch,
-  FaFilter
-} from 'react-icons/fa';
 import { adminService } from '../../../services/adminService';
 import { productService } from '../../../services/productService';
 import LoadingSpinner from '../../../components/common/LoadingSpinner/LoadingSpinner';
@@ -51,7 +43,7 @@ const AdminProducts = () => {
 
   const handleDelete = async () => {
     if (!selectedProduct) return;
-    
+
     try {
       await adminService.deleteProduct(selectedProduct.id);
       setProducts(products.filter(p => p.id !== selectedProduct.id));
@@ -64,7 +56,7 @@ const AdminProducts = () => {
 
   const filteredProducts = products.filter(product => {
     const matchesSearch = product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         product.description?.toLowerCase().includes(searchTerm.toLowerCase());
+      product.description?.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesCategory = !selectedCategory || product.categorySlug === selectedCategory;
     return matchesSearch && matchesCategory;
   });
@@ -78,14 +70,14 @@ const AdminProducts = () => {
       <div className="products-header">
         <h1>Quản lý sản phẩm</h1>
         <Link to="/admin/products/add" className="btn-add">
-          <FaPlus /> Thêm sản phẩm
+          ➕ Thêm sản phẩm
         </Link>
       </div>
 
       {/* Filters */}
       <div className="products-filters">
         <div className="search-box">
-          <FaSearch className="search-icon" />
+          <span className="search-icon">🔍</span>
           <input
             type="text"
             placeholder="Tìm kiếm sản phẩm..."
@@ -95,7 +87,7 @@ const AdminProducts = () => {
         </div>
 
         <div className="filter-box">
-          <FaFilter className="filter-icon" />
+          <span className="filter-icon">🌪️</span>
           <select
             value={selectedCategory}
             onChange={(e) => setSelectedCategory(e.target.value)}
@@ -131,8 +123,8 @@ const AdminProducts = () => {
               <tr key={product.id}>
                 <td>#{product.id}</td>
                 <td>
-                  <img 
-                    src={product.images[0]} 
+                  <img
+                    src={product.images[0]}
                     alt={product.name}
                     className="product-thumbnail"
                   />
@@ -157,27 +149,30 @@ const AdminProducts = () => {
                 </td>
                 <td>{formatDate(product.createdAt)}</td>
                 <td className="actions-cell">
-                  <Link 
-                    to={`/product/${product.id}`} 
+                  <Link
+                    to={`/product/${product.id}`}
                     className="btn-icon view"
                     target="_blank"
+                    title="Xem"
                   >
-                    <FaEye />
+                    👁️
                   </Link>
-                  <Link 
-                    to={`/admin/products/edit/${product.id}`} 
+                  <Link
+                    to={`/admin/products/edit/${product.id}`}
                     className="btn-icon edit"
+                    title="Sửa"
                   >
-                    <FaEdit />
+                    ✏️
                   </Link>
-                  <button 
+                  <button
                     className="btn-icon delete"
                     onClick={() => {
                       setSelectedProduct(product);
                       setShowDeleteModal(true);
                     }}
+                    title="Xóa"
                   >
-                    <FaTrash />
+                    🗑️
                   </button>
                 </td>
               </tr>
@@ -193,13 +188,13 @@ const AdminProducts = () => {
             <h3>Xác nhận xóa</h3>
             <p>Bạn có chắc chắn muốn xóa sản phẩm "{selectedProduct?.name}"?</p>
             <div className="modal-actions">
-              <button 
+              <button
                 className="btn-cancel"
                 onClick={() => setShowDeleteModal(false)}
               >
                 Hủy
               </button>
-              <button 
+              <button
                 className="btn-delete"
                 onClick={handleDelete}
               >

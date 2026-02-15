@@ -1,7 +1,9 @@
 const User = require('../models/User');
+const PasswordReset = require('../models/PasswordReset');
 const jwt = require('jsonwebtoken');
 const asyncHandler = require('express-async-handler');
 const validator = require('validator');
+const { sendPasswordResetCode } = require('../config/emailService');
 
 // Generate JWT Token
 const generateToken = (id) => {
@@ -239,11 +241,135 @@ const logout = asyncHandler(async (req, res) => {
   });
 });
 
+// @desc    Request password reset code
+// @route   POST /api/auth/forgot-password
+// @access  Public
+const forgotPassword = asyncHandler(async (req, res) => {
+  const { email } = req.body;
+
+  if (!email) {
+    res.status(400);
+    throw new Error('Vui lòng nhập email');
+  }
+
+  if (!validator.isEmail(email)) {
+    res.status(400);
+    throw new Error('Email không hợp lệ');
+  }
+
+  // Check if user exists
+  const user = await User.findOne({ email });
+  if (!user) {
+    res.status(404);
+    throw new Error('Không tìm thấy tài khoản với email này');
+  }
+
+  // Generate 6-digit code
+  const code = Math.floor(100000 + Math.random() * 900000).toString();
+
+  // Delete any existing reset codes for this email
+  await PasswordReset.deleteMany({ email });
+
+  // Create new reset code
+  await PasswordReset.create({ email, code });
+
+  // Send email
+  try {
+    await sendPasswordResetCode(email, code);
+
+    res.json({
+      status: 'success',
+      message: 'Mã xác nhận đã được gửi đến email của bạn'
+    });
+  } catch (error) {
+    // Delete the code if email fails
+    await PasswordReset.deleteMany({ email });
+    res.status(500);
+    throw new Error('Không thể gửi email. Vui lòng thử lại sau.');
+  }
+});
+
+// @desc    Verify reset code
+// @route   POST /api/auth/verify-reset-code
+// @access  Public
+const verifyResetCode = asyncHandler(async (req, res) => {
+  const { email, code } = req.body;
+
+  if (!email || !code) {
+    res.status(400);
+    throw new Error('Vui lòng nhập email và mã xác nhận');
+  }
+
+  // Find reset code
+  const resetCode = await PasswordReset.findOne({ email, code, used: false });
+
+  if (!resetCode) {
+    res.status(400);
+    throw new Error('Mã xác nhận không hợp lệ hoặc đã hết hạn');
+  }
+
+  res.json({
+    status: 'success',
+    message: 'Mã xác nhận hợp lệ'
+  });
+});
+
+// @desc    Reset password
+// @route   POST /api/auth/reset-password
+// @access  Public
+const resetPassword = asyncHandler(async (req, res) => {
+  const { email, code, newPassword } = req.body;
+
+  if (!email || !code || !newPassword) {
+    res.status(400);
+    throw new Error('Vui lòng điền đầy đủ thông tin');
+  }
+
+  if (newPassword.length < 6) {
+    res.status(400);
+    throw new Error('Mật khẩu mới phải có ít nhất 6 ký tự');
+  }
+
+  // Find reset code
+  const resetCode = await PasswordReset.findOne({ email, code, used: false });
+
+  if (!resetCode) {
+    res.status(400);
+    throw new Error('Mã xác nhận không hợp lệ hoặc đã hết hạn');
+  }
+
+  // Find user
+  const user = await User.findOne({ email }).select('+password');
+  if (!user) {
+    res.status(404);
+    throw new Error('Không tìm thấy tài khoản');
+  }
+
+  // Update password
+  user.password = newPassword;
+  await user.save();
+
+  // Mark code as used
+  resetCode.used = true;
+  await resetCode.save();
+
+  // Delete all reset codes for this email
+  await PasswordReset.deleteMany({ email });
+
+  res.json({
+    status: 'success',
+    message: 'Đặt lại mật khẩu thành công. Vui lòng đăng nhập lại.'
+  });
+});
+
 module.exports = {
   register,
   login,
   getMe,
   updateProfile,
   changePassword,
-  logout
+  logout,
+  forgotPassword,
+  verifyResetCode,
+  resetPassword
 };

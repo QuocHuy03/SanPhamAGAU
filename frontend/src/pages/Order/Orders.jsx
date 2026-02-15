@@ -137,7 +137,7 @@ const Orders = () => {
 
   const getPaymentMethodText = (method) => {
     const methods = {
-      'cod': 'Thanh toán khi nhận hàng (COD)',
+      'cod': 'Trả tiền khi nhận hàng',
       'banking': 'Chuyển khoản ngân hàng',
       'momo': 'Ví MoMo'
     };
@@ -151,7 +151,7 @@ const Orders = () => {
 
   const handleCancelOrder = (orderId) => {
     if (window.confirm('Bạn có chắc chắn muốn hủy đơn hàng này?')) {
-      const updatedOrders = orders.map(order => 
+      const updatedOrders = orders.map(order =>
         order.id === orderId ? { ...order, status: 'cancelled' } : order
       );
       setOrders(updatedOrders);
@@ -191,7 +191,7 @@ const Orders = () => {
   return (
     <div className="orders-container">
       <h1>Đơn hàng của tôi</h1>
-      
+
       <div className="orders-list">
         {orders.map(order => (
           <div key={order.id} className="order-card">
@@ -204,7 +204,7 @@ const Orders = () => {
                 {getStatusText(order.status)}
               </span>
             </div>
-            
+
             <div className="order-body">
               <div className="order-items">
                 {order.items.map((item, index) => (
@@ -222,21 +222,21 @@ const Orders = () => {
                 ))}
               </div>
             </div>
-            
+
             <div className="order-footer">
               <div className="order-total">
-                Tổng tiền: 
+                Tổng tiền:
                 <span className="total-amount">{order.totalAmount.toLocaleString()}đ</span>
               </div>
               <div className="order-actions">
-                <button 
+                <button
                   className="btn-detail"
                   onClick={() => handleViewDetail(order)}
                 >
                   Chi tiết
                 </button>
                 {order.status === 'pending' && (
-                  <button 
+                  <button
                     className="btn-cancel"
                     onClick={() => handleCancelOrder(order.id)}
                   >
@@ -244,7 +244,7 @@ const Orders = () => {
                   </button>
                 )}
                 {order.status === 'delivered' && (
-                  <button 
+                  <button
                     className="btn-detail"
                     onClick={() => handleReorder(order)}
                   >
@@ -262,9 +262,9 @@ const Orders = () => {
         <div className="modal-overlay" onClick={() => setShowModal(false)}>
           <div className="modal-content" onClick={e => e.stopPropagation()}>
             <button className="modal-close" onClick={() => setShowModal(false)}>×</button>
-            
+
             <h2 className="modal-title">Chi tiết đơn hàng {selectedOrder.id}</h2>
-            
+
             <div className="order-detail-section">
               <h3>Thông tin giao hàng</h3>
               <div className="detail-row">
@@ -286,7 +286,7 @@ const Orders = () => {
                 </span>
               </div>
             </div>
-            
+
             <div className="order-detail-section">
               <h3>Phương thức thanh toán</h3>
               <div className="detail-row">
@@ -304,7 +304,7 @@ const Orders = () => {
                 </div>
               )}
             </div>
-            
+
             <div className="order-detail-section">
               <h3>Sản phẩm đã đặt</h3>
               {selectedOrder.items.map((item, index) => (
@@ -320,7 +320,7 @@ const Orders = () => {
                   </span>
                 </div>
               ))}
-              
+
               <div style={{ marginTop: '20px', borderTop: '2px solid #eee', paddingTop: '15px' }}>
                 <div className="detail-row">
                   <span className="detail-label">Tạm tính:</span>

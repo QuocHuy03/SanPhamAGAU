@@ -100,7 +100,7 @@ const orderSchema = new mongoose.Schema({
 });
 
 // Generate order number before save
-orderSchema.pre('save', function(next) {
+orderSchema.pre('save', function (next) {
   if (!this.orderNumber) {
     const date = new Date();
     const year = date.getFullYear().toString().substr(-2);
@@ -111,6 +111,13 @@ orderSchema.pre('save', function(next) {
   }
   next();
 });
+
+// Create indexes
+orderSchema.index({ user: 1 });
+orderSchema.index({ orderNumber: 1 }, { unique: true });
+orderSchema.index({ status: 1 });
+orderSchema.index({ paymentStatus: 1 });
+orderSchema.index({ createdAt: -1 });
 
 const Order = mongoose.model('Order', orderSchema);
 

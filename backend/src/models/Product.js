@@ -25,7 +25,7 @@ const productSchema = new mongoose.Schema({
   discountPrice: {
     type: Number,
     validate: {
-      validator: function(value) {
+      validator: function (value) {
         return value < this.price;
       },
       message: 'Giá khuyến mãi phải nhỏ hơn giá gốc'
@@ -119,7 +119,7 @@ const productSchema = new mongoose.Schema({
 });
 
 // Calculate discount percent before save
-productSchema.pre('save', function(next) {
+productSchema.pre('save', function (next) {
   if (this.discountPrice && this.price) {
     this.discountPercent = Math.round(((this.price - this.discountPrice) / this.price) * 100);
   }
@@ -127,10 +127,21 @@ productSchema.pre('save', function(next) {
 });
 
 // Update timestamp
-productSchema.pre('save', function(next) {
+productSchema.pre('save', function (next) {
   this.updatedAt = Date.now();
   next();
 });
+
+// Create indexes for better query performance
+productSchema.index({ slug: 1 });
+productSchema.index({ category: 1 });
+productSchema.index({ price: 1 });
+productSchema.index({ rating: -1 });
+productSchema.index({ sold: -1 });
+productSchema.index({ createdAt: -1 });
+productSchema.index({ status: 1 });
+productSchema.index({ featured: 1 });
+productSchema.index({ name: 'text', description: 'text', tags: 'text' }); // Text search index
 
 const Product = mongoose.model('Product', productSchema);
 

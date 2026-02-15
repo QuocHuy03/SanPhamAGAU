@@ -54,6 +54,12 @@ categorySchema.virtual('products', {
   localField: '_id'
 });
 
+// Create indexes
+categorySchema.index({ slug: 1 }, { unique: true });
+categorySchema.index({ parent: 1 });
+categorySchema.index({ active: 1 });
+categorySchema.index({ order: 1 });
+
 const Category = mongoose.model('Category', categorySchema);
 
 module.exports = Category;

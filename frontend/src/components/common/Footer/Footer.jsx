@@ -1,6 +1,5 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { FaFacebook, FaInstagram, FaTwitter, FaYoutube } from 'react-icons/fa';
 import './Footer.css';
 
 const Footer = () => {
@@ -14,11 +13,11 @@ const Footer = () => {
             <p className="footer-text">
               Chuyên cung cấp quần áo thời trang chất lượng cao với giá cả hợp lý.
             </p>
-            <div className="social-links">
-              <a href="#" className="social-link"><FaFacebook /></a>
-              <a href="#" className="social-link"><FaInstagram /></a>
-              <a href="#" className="social-link"><FaTwitter /></a>
-              <a href="#" className="social-link"><FaYoutube /></a>
+            <div className="social-links" style={{ display: 'none' }}>
+              <a href="#" className="social-link">Facebook</a>
+              <a href="#" className="social-link">Instagram</a>
+              <a href="#" className="social-link">Twitter</a>
+              <a href="#" className="social-link">Youtube</a>
             </div>
           </div>
 
@@ -48,9 +47,9 @@ const Footer = () => {
           <div className="footer-section">
             <h3 className="footer-title">Thông tin liên hệ</h3>
             <ul className="footer-contact">
-              <li>📍 123 Đường ABC, Quận 1, TP.HCM</li>
-              <li>📞 0123 456 789</li>
-              <li>✉️ contact@shopthoitrang.com</li>
+              <li>123 Đường ABC, Quận 1, TP.HCM</li>
+              <li>0123 456 789</li>
+              <li>contact@shopthoitrang.com</li>
             </ul>
           </div>
         </div>

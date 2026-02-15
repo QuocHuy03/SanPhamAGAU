@@ -5,17 +5,43 @@ const {
   getAdminUsers,
   getAdminUserDetail,
   updateUserByAdmin,
-  deleteUserByAdmin
+  deleteUserByAdmin,
+  getAllCategories,
+  createCategory,
+  updateCategory,
+  deleteCategory,
+  updateOrderStatus,
+  getAllOrders,
+  getOrderDetail
 } = require('../controllers/adminController');
 const { protect, admin } = require('../middleware/authMiddleware');
 
-// Admin dashboard
-router.get('/dashboard', protect, admin, getDashboardSummary);
+// All routes require admin authentication
+router.use(protect);
+router.use(admin);
+
+// Dashboard
+router.get('/dashboard', getDashboardSummary);
+router.get('/stats', getDashboardSummary); // alias
 
 // User management
-router.get('/users', protect, admin, getAdminUsers);
-router.get('/users/:id', protect, admin, getAdminUserDetail);
-router.put('/users/:id', protect, admin, updateUserByAdmin);
-router.delete('/users/:id', protect, admin, deleteUserByAdmin);
+router.get('/users', getAdminUsers);
+router.get('/users/:id', getAdminUserDetail);
+router.put('/users/:id', updateUserByAdmin);
+router.delete('/users/:id', deleteUserByAdmin);
+
+// Category management
+router.route('/categories')
+  .get(getAllCategories)
+  .post(createCategory);
+
+router.route('/categories/:id')
+  .put(updateCategory)
+  .delete(deleteCategory);
+
+// Order management
+router.get('/orders', getAllOrders);
+router.get('/orders/:id', getOrderDetail);
+router.put('/orders/:id/status', updateOrderStatus);
 
 module.exports = router;

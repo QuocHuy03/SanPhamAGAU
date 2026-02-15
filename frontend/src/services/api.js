@@ -3,7 +3,7 @@ import { toast } from 'react-hot-toast';
 
 // Create axios instance - SỬA BASE URL
 const api = axios.create({
-  baseURL: process.env.REACT_APP_API_URL || 'http://localhost:6000/api',
+  baseURL: process.env.REACT_APP_API_URL || 'http://localhost:2000/api',
   timeout: 15000, // Tăng timeout
   headers: {
     'Content-Type': 'application/json',

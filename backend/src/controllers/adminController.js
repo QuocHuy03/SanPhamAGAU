@@ -20,7 +20,7 @@ const getDashboardSummary = asyncHandler(async (req, res) => {
 
   const newUsersToday = await User.countDocuments({ createdAt: { $gte: today } });
   const newOrdersToday = await Order.countDocuments({ createdAt: { $gte: today } });
-  
+
   // Total revenue
   const revenueResult = await Order.aggregate([
     {
@@ -185,7 +185,7 @@ const deleteUserByAdmin = asyncHandler(async (req, res) => {
 
   // Check if user has orders
   const hasOrders = await Order.exists({ user: user._id });
-  
+
   if (hasOrders) {
     res.status(400);
     throw new Error('Không thể xóa người dùng đã có đơn hàng');
@@ -199,10 +199,215 @@ const deleteUserByAdmin = asyncHandler(async (req, res) => {
   });
 });
 
+// @desc    Get all categories
+// @route   GET /api/admin/categories
+// @access  Private/Admin
+const getAllCategories = asyncHandler(async (req, res) => {
+  const categories = await Category.find().sort({ createdAt: -1 });
+
+  res.json({
+    status: 'success',
+    data: { categories }
+  });
+});
+
+// @desc    Create category
+// @route   POST /api/admin/categories
+// @access  Private/Admin
+const createCategory = asyncHandler(async (req, res) => {
+  const { name, slug, description, image, parent, level } = req.body;
+
+  if (!name || !slug) {
+    res.status(400);
+    throw new Error('Tên và slug là bắt buộc');
+  }
+
+  const categoryExists = await Category.findOne({ slug });
+  if (categoryExists) {
+    res.status(400);
+    throw new Error('Slug đã tồn tại');
+  }
+
+  const category = await Category.create({
+    name,
+    slug,
+    description,
+    image,
+    parent,
+    level: level || 0
+  });
+
+  res.status(201).json({
+    status: 'success',
+    message: 'Tạo danh mục thành công',
+    data: { category }
+  });
+});
+
+// @desc    Update category
+// @route   PUT /api/admin/categories/:id
+// @access  Private/Admin
+const updateCategory = asyncHandler(async (req, res) => {
+  const category = await Category.findById(req.params.id);
+
+  if (!category) {
+    res.status(404);
+    throw new Error('Không tìm thấy danh mục');
+  }
+
+  const { name, slug, description, image, parent, level, isFeatured } = req.body;
+
+  if (name) category.name = name;
+  if (slug) category.slug = slug;
+  if (description !== undefined) category.description = description;
+  if (image !== undefined) category.image = image;
+  if (parent !== undefined) category.parent = parent;
+  if (level !== undefined) category.level = level;
+  if (isFeatured !== undefined) category.isFeatured = isFeatured;
+
+  await category.save();
+
+  res.json({
+    status: 'success',
+    message: 'Cập nhật danh mục thành công',
+    data: { category }
+  });
+});
+
+// @desc    Delete category
+// @route   DELETE /api/admin/categories/:id
+// @access  Private/Admin
+const deleteCategory = asyncHandler(async (req, res) => {
+  const category = await Category.findById(req.params.id);
+
+  if (!category) {
+    res.status(404);
+    throw new Error('Không tìm thấy danh mục');
+  }
+
+  const productsCount = await Product.countDocuments({ category: category._id });
+  if (productsCount > 0) {
+    res.status(400);
+    throw new Error(`Không thể xóa danh mục có ${productsCount} sản phẩm`);
+  }
+
+  await category.deleteOne();
+
+  res.json({
+    status: 'success',
+    message: 'Xóa danh mục thành công'
+  });
+});
+
+// @desc    Get all orders
+// @route   GET /api/admin/orders
+// @access  Private/Admin
+const getAllOrders = asyncHandler(async (req, res) => {
+  const pageSize = Number(req.query.limit) || 10;
+  const page = Number(req.query.page) || 1;
+  const status = req.query.status;
+  const date = req.query.date;
+
+  const keyword = req.query.keyword
+    ? {
+      orderNumber: {
+        $regex: req.query.keyword,
+        $options: 'i',
+      },
+    }
+    : {};
+
+  const filter = { ...keyword };
+  if (status) {
+    filter.status = status;
+  }
+  if (date) {
+    const searchDate = new Date(date);
+    const nextDay = new Date(searchDate);
+    nextDay.setDate(searchDate.getDate() + 1);
+    filter.createdAt = {
+      $gte: searchDate,
+      $lt: nextDay
+    };
+  }
+
+  const count = await Order.countDocuments(filter);
+  const orders = await Order.find(filter)
+    .populate('user', 'id name email')
+    .sort({ createdAt: -1 })
+    .limit(pageSize)
+    .skip(pageSize * (page - 1));
+
+  res.json({
+    status: 'success',
+    data: {
+      orders,
+      page,
+      pages: Math.ceil(count / pageSize),
+      total: count
+    }
+  });
+});
+
+// @desc    Get order detail
+// @route   GET /api/admin/orders/:id
+// @access  Private/Admin
+const getOrderDetail = asyncHandler(async (req, res) => {
+  const order = await Order.findById(req.params.id)
+    .populate('user', 'name email phone')
+    .populate('items.product', 'name image price');
+
+  if (order) {
+    res.json({
+      status: 'success',
+      data: { order }
+    });
+  } else {
+    res.status(404);
+    throw new Error('Không tìm thấy đơn hàng');
+  }
+});
+
+// @desc    Update order status
+// @route   PUT /api/admin/orders/:id/status
+// @access  Private/Admin
+const updateOrderStatus = asyncHandler(async (req, res) => {
+  const { status } = req.body;
+
+  const validStatuses = ['pending', 'confirmed', 'processing', 'shipping', 'delivered', 'cancelled'];
+  if (!validStatuses.includes(status)) {
+    res.status(400);
+    throw new Error('Trạng thái không hợp lệ');
+  }
+
+  const order = await Order.findById(req.params.id);
+
+  if (!order) {
+    res.status(404);
+    throw new Error('Không tìm thấy đơn hàng');
+  }
+
+  order.status = status;
+  await order.save();
+
+  res.json({
+    status: 'success',
+    message: 'Cập nhật trạng thái đơn hàng thành công',
+    data: { order }
+  });
+});
+
 module.exports = {
   getDashboardSummary,
   getAdminUsers,
   getAdminUserDetail,
   updateUserByAdmin,
-  deleteUserByAdmin
+  deleteUserByAdmin,
+  getAllCategories,
+  createCategory,
+  updateCategory,
+  deleteCategory,
+  updateOrderStatus,
+  getAllOrders,
+  getOrderDetail
 };
