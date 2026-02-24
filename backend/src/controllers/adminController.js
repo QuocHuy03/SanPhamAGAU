@@ -93,14 +93,39 @@ const getDashboardSummary = asyncHandler(async (req, res) => {
 // @route   GET /api/admin/users
 // @access  Private/Admin
 const getAdminUsers = asyncHandler(async (req, res) => {
-  const users = await User.find()
-    .select('-password')
-    .sort({ createdAt: -1 });
+  const { search, role, page = 1, limit = 20 } = req.query;
+
+  const filter = {};
+
+  if (search) {
+    filter.$or = [
+      { name: { $regex: search, $options: 'i' } },
+      { email: { $regex: search, $options: 'i' } }
+    ];
+  }
+
+  if (role) {
+    filter.role = role;
+  }
+
+  const skip = (Number(page) - 1) * Number(limit);
+
+  const [users, total] = await Promise.all([
+    User.find(filter)
+      .select('-password')
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(Number(limit)),
+    User.countDocuments(filter)
+  ]);
 
   res.json({
     status: 'success',
     data: {
-      users
+      users,
+      total,
+      page: Number(page),
+      totalPages: Math.ceil(total / Number(limit))
     }
   });
 });

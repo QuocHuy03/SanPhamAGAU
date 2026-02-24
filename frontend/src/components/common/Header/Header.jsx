@@ -5,6 +5,7 @@ import { FaShoppingCart, FaUser, FaBars, FaTimes } from 'react-icons/fa';
 import './Header.css';
 import CartIcon from './CartIcon';
 import SearchBar from './SearchBar';
+import LanguageSwitcher from '../LanguageSwitcher/LanguageSwitcher';
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -29,7 +30,7 @@ const Header = () => {
 
           {/* Navigation */}
           <nav className={`nav ${isMenuOpen ? 'open' : ''}`}>
-            <button 
+            <button
               className="nav-close"
               onClick={() => setIsMenuOpen(false)}
             >
@@ -45,19 +46,20 @@ const Header = () => {
 
           {/* User Actions */}
           <div className="user-actions">
+            <LanguageSwitcher />
             <Link to="/cart" className="cart-icon">
               <CartIcon count={itemCount} />
             </Link>
-            
+
             <Link to={isAuthenticated ? "/profile" : "/login"} className="user-icon">
               <FaUser />
               {isAuthenticated && user?.name && (
                 <span className="user-name-mobile">{user.name.split(' ').pop()}</span>
               )}
             </Link>
-            
-            <button 
-              className="menu-toggle" 
+
+            <button
+              className="menu-toggle"
               onClick={() => setIsMenuOpen(!isMenuOpen)}
             >
               <FaBars />

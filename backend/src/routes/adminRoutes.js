@@ -14,6 +14,7 @@ const {
   getAllOrders,
   getOrderDetail
 } = require('../controllers/adminController');
+const { getSettings, updateSettings } = require('../controllers/settingsController');
 const { protect, admin } = require('../middleware/authMiddleware');
 
 // All routes require admin authentication
@@ -43,5 +44,9 @@ router.route('/categories/:id')
 router.get('/orders', getAllOrders);
 router.get('/orders/:id', getOrderDetail);
 router.put('/orders/:id/status', updateOrderStatus);
+
+// Settings management
+router.get('/settings', getSettings);
+router.put('/settings', updateSettings);
 
 module.exports = router;

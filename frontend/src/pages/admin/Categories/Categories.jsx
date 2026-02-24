@@ -2,6 +2,16 @@ import React, { useState, useEffect } from 'react';
 import adminService from '../../../services/adminService';
 import './Categories.css';
 
+const generateSlug = (name) =>
+    name
+        .toLowerCase()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .replace(/\u0111/g, 'd')
+        .replace(/[^a-z0-9\s-]/g, '')
+        .trim()
+        .replace(/\s+/g, '-');
+
 const Categories = () => {
     const [categories, setCategories] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -81,6 +91,19 @@ const Categories = () => {
         setShowModal(true);
     };
 
+    const handleNameChange = (value) => {
+        setFormData(prev => ({
+            ...prev,
+            name: value,
+            // Auto-gen slug chỉ khi thêm mới (editCategory null)
+            ...(!editCategory ? { slug: generateSlug(value) } : {})
+        }));
+    };
+
+    const handleRegenerateSlug = () => {
+        setFormData(prev => ({ ...prev, slug: generateSlug(prev.name) }));
+    };
+
     if (loading) return <div className="loading">Đang tải...</div>;
 
     return (
@@ -120,18 +143,31 @@ const Categories = () => {
                                 <input
                                     type="text"
                                     value={formData.name}
-                                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                                    onChange={(e) => handleNameChange(e.target.value)}
                                     required
                                 />
                             </div>
 
                             <div className="form-group">
-                                <label>Slug *</label>
+                                <label style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                    <span>Slug *</span>
+                                    <button
+                                        type="button"
+                                        onClick={handleRegenerateSlug}
+                                        style={{
+                                            fontSize: '0.75rem', background: 'none', border: '1px solid #ccc',
+                                            borderRadius: 4, padding: '2px 8px', cursor: 'pointer', color: '#555'
+                                        }}
+                                    >
+                                        🔄 Tạo lại từ tên
+                                    </button>
+                                </label>
                                 <input
                                     type="text"
                                     value={formData.slug}
                                     onChange={(e) => setFormData({ ...formData, slug: e.target.value })}
                                     required
+                                    placeholder="ten-danh-muc"
                                 />
                             </div>
 

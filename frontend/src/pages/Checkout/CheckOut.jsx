@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
+import { clearCart } from '../../store/slices/cartSlice';
+import { orderService } from '../../services/orderService';
 import './CheckOut.css';
 
 const CheckOut = () => {
@@ -8,9 +10,10 @@ const CheckOut = () => {
   const dispatch = useDispatch();
   const { items } = useSelector((state) => state.cart);
   const { user } = useSelector((state) => state.auth);
+  const [loading, setLoading] = useState(false);
 
   const [formData, setFormData] = useState({
-    fullName: user?.fullName || '',
+    fullName: user?.name || '',
     email: user?.email || '',
     address: '',
     city: '',
@@ -26,28 +29,6 @@ const CheckOut = () => {
     });
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-
-    if (!items || items.length === 0) {
-      alert('Giỏ hàng trống!');
-      navigate('/cart');
-      return;
-    }
-
-    const orderData = {
-      ...formData,
-      items: items,
-      totalAmount: calculateTotal(),
-      orderDate: new Date().toISOString()
-    };
-
-    console.log('Đơn hàng:', orderData);
-
-    alert('Đặt hàng thành công!');
-    navigate('/orders');
-  };
-
   const calculateSubtotal = () => {
     return items?.reduce((sum, item) => sum + (item.price * item.quantity), 0) || 0;
   };
@@ -59,6 +40,70 @@ const CheckOut = () => {
   };
 
   const shippingFee = calculateSubtotal() > 500000 ? 0 : 30000;
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    if (!items || items.length === 0) {
+      alert('Giỏ hàng trống!');
+      navigate('/cart');
+      return;
+    }
+
+    if (!user) {
+      alert('Vui lòng đăng nhập để đặt hàng!');
+      navigate('/login');
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const subtotal = calculateSubtotal();
+      const total = calculateTotal();
+
+      // Map cart items sang order items format
+      const orderItems = items.map(item => ({
+        product: item._id || item.id,
+        name: item.name,
+        price: item.price,
+        quantity: item.quantity,
+        size: item.size || '',
+        color: item.color?.name || item.color || '',
+        image: item.images?.[0]?.url || item.image || ''
+      }));
+
+      const orderData = {
+        items: orderItems,
+        shippingAddress: {
+          fullName: formData.fullName,
+          phone: formData.phone,
+          street: formData.address,
+          city: formData.city,
+          note: formData.note
+        },
+        paymentMethod: formData.paymentMethod === 'banking' ? 'bank_transfer' : formData.paymentMethod,
+        shippingMethod: 'standard',
+        shippingFee,
+        subtotal,
+        total,
+        note: formData.note
+      };
+
+      await orderService.createOrder(orderData);
+
+      // Xóa cart sau khi đặt hàng thành công
+      dispatch(clearCart());
+
+      alert('Đặt hàng thành công! Cảm ơn bạn đã mua hàng.');
+      navigate('/order');
+    } catch (error) {
+      console.error('Order error:', error);
+      const message = error.response?.data?.message || 'Có lỗi xảy ra khi đặt hàng. Vui lòng thử lại!';
+      alert(message);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   if (!items || items.length === 0) {
     return (
@@ -200,8 +245,8 @@ const CheckOut = () => {
               />
             </div>
 
-            <button type="submit" className="checkout-btn">
-              Đặt hàng
+            <button type="submit" className="checkout-btn" disabled={loading}>
+              {loading ? 'Đang đặt hàng...' : 'Đặt hàng'}
             </button>
           </form>
         </div>
@@ -211,12 +256,12 @@ const CheckOut = () => {
 
           <div className="cart-items">
             {items.map(item => (
-              <div key={item.id} className="cart-item">
+              <div key={item.id || item._id} className="cart-item">
                 <div className="cart-item-info">
                   <span className="item-name">{item.name}</span>
                   <div className="item-meta">
                     {item.size && <span>Size: {item.size}</span>}
-                    {item.color && <span>Màu: {item.color.name}</span>}
+                    {item.color && <span>Màu: {item.color?.name || item.color}</span>}
                     <span className="item-quantity">x{item.quantity}</span>
                   </div>
                 </div>

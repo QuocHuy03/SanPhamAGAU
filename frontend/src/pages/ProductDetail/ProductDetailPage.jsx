@@ -1,42 +1,41 @@
-import React, { useState, useEffect, useCallback } from 'react'; // Thêm useCallback
+import React, { useState, useEffect, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
-// Xóa useSelector không dùng
 import ProductDetail from '../../components/product/ProductDetail/ProductDetail';
 import ProductList from '../../components/product/ProductList/ProductList';
 import LoadingSpinner from '../../components/common/LoadingSpinner/LoadingSpinner';
 import { productService } from '../../services/productService';
-// Xóa import addToCart không dùng
 import './ProductDetailPage.css';
 
 const ProductDetailPage = () => {
   const { id } = useParams();
-  // Xóa dispatch không dùng
   const [product, setProduct] = useState(null);
   const [relatedProducts, setRelatedProducts] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // Dùng useCallback để tránh dependency warning
   const fetchProduct = useCallback(async () => {
     try {
       setLoading(true);
+      // Fix: dùng getProductById thay vì getProductBySlug vì route là /product/:id
       const productData = await productService.getProductById(id);
       setProduct(productData);
-      
-      // Fetch related products
-      const related = await productService.getProductsByCategory(productData.categorySlug);
-      setRelatedProducts(related.filter(p => p.id !== productData.id).slice(0, 4));
+
+      if (productData) {
+        // Fetch related products bằng ID
+        const related = await productService.getRelatedProducts(id);
+        setRelatedProducts(related.filter(p => p._id !== id).slice(0, 4));
+      }
     } catch (error) {
       console.error('Error fetching product:', error);
     } finally {
       setLoading(false);
     }
-  }, [id]); // Thêm id vào dependency
+  }, [id]);
 
   useEffect(() => {
     if (id) {
       fetchProduct();
     }
-  }, [id, fetchProduct]); // Thêm fetchProduct vào dependency
+  }, [id, fetchProduct]);
 
   if (loading) {
     return <LoadingSpinner />;
@@ -55,7 +54,7 @@ const ProductDetailPage = () => {
     <div className="product-detail-page">
       <div className="container">
         <ProductDetail product={product} />
-        
+
         {/* Related Products */}
         {relatedProducts.length > 0 && (
           <section className="related-products">

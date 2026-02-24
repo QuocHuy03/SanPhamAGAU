@@ -1,38 +1,50 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { 
-  FaShoppingBag, 
-  FaUsers, 
-  FaBoxes, 
+import {
+  FaShoppingBag,
+  FaUsers,
+  FaBoxes,
   FaMoneyBillWave,
   FaArrowUp,
   FaArrowDown,
-  FaCalendarAlt
 } from 'react-icons/fa';
 import { adminService } from '../../../services/adminService';
 import LoadingSpinner from '../../../components/common/LoadingSpinner/LoadingSpinner';
 import { formatCurrency, formatDate } from '../../../utils/helpers';
 import './Dashboard.css';
 
+const STATUS_LABELS = {
+  pending: 'Chờ xác nhận',
+  confirmed: 'Đã xác nhận',
+  processing: 'Đang xử lý',
+  shipped: 'Đang giao',
+  delivered: 'Đã giao',
+  cancelled: 'Đã hủy'
+};
+
 const AdminDashboard = () => {
   const [stats, setStats] = useState(null);
   const [recentOrders, setRecentOrders] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [period, setPeriod] = useState('week');
 
   useEffect(() => {
     fetchDashboardData();
-  }, [period]);
+  }, []);
 
   const fetchDashboardData = async () => {
     try {
       setLoading(true);
-      const [statsData, ordersData] = await Promise.all([
+      const [statsResponse, ordersResponse] = await Promise.all([
         adminService.getDashboardStats(),
         adminService.getAllOrders({ page: 1, limit: 5 })
       ]);
-      
+
+      // getDashboardStats returns response.data directly
+      const statsData = statsResponse?.data?.summary || statsResponse?.summary || statsResponse;
       setStats(statsData);
+
+      // getAllOrders returns response.data which has {orders, ...}
+      const ordersData = ordersResponse?.data || ordersResponse;
       setRecentOrders(ordersData.orders || []);
     } catch (error) {
       console.error('Error fetching dashboard data:', error);
@@ -49,26 +61,6 @@ const AdminDashboard = () => {
     <div className="admin-dashboard">
       <div className="dashboard-header">
         <h1 className="dashboard-title">Dashboard</h1>
-        <div className="period-selector">
-          <button 
-            className={`period-btn ${period === 'week' ? 'active' : ''}`}
-            onClick={() => setPeriod('week')}
-          >
-            Tuần này
-          </button>
-          <button 
-            className={`period-btn ${period === 'month' ? 'active' : ''}`}
-            onClick={() => setPeriod('month')}
-          >
-            Tháng này
-          </button>
-          <button 
-            className={`period-btn ${period === 'year' ? 'active' : ''}`}
-            onClick={() => setPeriod('year')}
-          >
-            Năm nay
-          </button>
-        </div>
       </div>
 
       {/* Stats Cards */}
@@ -81,7 +73,7 @@ const AdminDashboard = () => {
             <h3>Doanh thu</h3>
             <p className="stat-value">{formatCurrency(stats?.totalRevenue || 0)}</p>
             <span className="stat-change positive">
-              <FaArrowUp /> +{stats?.revenueGrowth || 0}%
+              <FaArrowUp /> Tháng này: {formatCurrency(stats?.monthlyRevenue || 0)}
             </span>
           </div>
         </div>
@@ -94,7 +86,7 @@ const AdminDashboard = () => {
             <h3>Đơn hàng</h3>
             <p className="stat-value">{stats?.totalOrders || 0}</p>
             <span className="stat-change positive">
-              <FaArrowUp /> +{stats?.orderGrowth || 0}%
+              <FaArrowUp /> Hôm nay: +{stats?.newOrdersToday || 0}
             </span>
           </div>
         </div>
@@ -107,7 +99,7 @@ const AdminDashboard = () => {
             <h3>Sản phẩm</h3>
             <p className="stat-value">{stats?.totalProducts || 0}</p>
             <span className="stat-change">
-              <FaArrowDown /> {stats?.lowStock || 0} sắp hết
+              <FaArrowDown /> Danh mục: {stats?.totalCategories || 0}
             </span>
           </div>
         </div>
@@ -120,7 +112,7 @@ const AdminDashboard = () => {
             <h3>Người dùng</h3>
             <p className="stat-value">{stats?.totalUsers || 0}</p>
             <span className="stat-change positive">
-              <FaArrowUp /> +{stats?.userGrowth || 0}%
+              <FaArrowUp /> Hôm nay: +{stats?.newUsersToday || 0}
             </span>
           </div>
         </div>
@@ -148,15 +140,21 @@ const AdminDashboard = () => {
               </tr>
             </thead>
             <tbody>
-              {recentOrders.map(order => (
+              {recentOrders.length === 0 ? (
+                <tr>
+                  <td colSpan="6" style={{ textAlign: 'center', padding: '20px' }}>
+                    Chưa có đơn hàng nào
+                  </td>
+                </tr>
+              ) : recentOrders.map(order => (
                 <tr key={order._id}>
-                  <td>#{order.orderCode}</td>
-                  <td>{order.customer?.name}</td>
+                  <td>#{order.orderNumber || order._id?.slice(-6)}</td>
+                  <td>{order.user?.name || 'N/A'}</td>
                   <td>{formatDate(order.createdAt)}</td>
-                  <td>{formatCurrency(order.totalAmount)}</td>
+                  <td>{formatCurrency(order.total || 0)}</td>
                   <td>
                     <span className={`status-badge ${order.status}`}>
-                      {order.status}
+                      {STATUS_LABELS[order.status] || order.status}
                     </span>
                   </td>
                   <td>

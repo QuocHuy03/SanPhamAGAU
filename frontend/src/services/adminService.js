@@ -2,7 +2,7 @@ import api from './api';
 
 // Dashboard Stats
 export const getDashboardStats = async () => {
-  const response = await api.get('/admin/stats');
+  const response = await api.get('/admin/dashboard');
   return response.data;
 };
 
@@ -61,7 +61,18 @@ export const getOrderDetail = async (id) => {
 
 export const updateOrderStatus = async (id, status) => {
   const response = await api.put(`/admin/orders/${id}/status`, { status });
-  return response;
+  return response.data;
+};
+
+// Settings Management
+export const getSettings = async () => {
+  const response = await api.get('/admin/settings');
+  return response.data;
+};
+
+export const updateSettings = async (data) => {
+  const response = await api.put('/admin/settings', data);
+  return response.data;
 };
 
 // Export all as default object
@@ -77,7 +88,9 @@ const adminService = {
   deleteCategory,
   updateOrderStatus,
   getAllOrders,
-  getOrderDetail
+  getOrderDetail,
+  getSettings,
+  updateSettings
 };
 
 export { adminService };

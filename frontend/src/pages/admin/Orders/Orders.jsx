@@ -3,8 +3,16 @@ import { Link } from 'react-router-dom';
 import { adminService } from '../../../services/adminService';
 import LoadingSpinner from '../../../components/common/LoadingSpinner/LoadingSpinner';
 import { formatCurrency, formatDate } from '../../../utils/helpers';
-import { ORDER_STATUS } from '../../../utils/constants';
 import './Orders.css';
+
+const ORDER_STATUS_MAP = {
+  pending: { text: 'Chờ xác nhận', color: 'pending' },
+  confirmed: { text: 'Đã xác nhận', color: 'confirmed' },
+  processing: { text: 'Đang xử lý', color: 'processing' },
+  shipped: { text: 'Đang giao', color: 'shipped' },
+  delivered: { text: 'Đã giao', color: 'delivered' },
+  cancelled: { text: 'Đã hủy', color: 'cancelled' }
+};
 
 const AdminOrders = () => {
   const [orders, setOrders] = useState([]);
@@ -32,10 +40,12 @@ const AdminOrders = () => {
         date: selectedDate
       });
 
-      setOrders(response.orders || []);
+      // Backend trả về response.data.data.orders
+      const data = response?.data || response;
+      setOrders(data.orders || []);
       setPagination(prev => ({
         ...prev,
-        total: response.total || 0
+        total: data.total || data.pagination?.total || 0
       }));
     } catch (error) {
       console.error('Error fetching orders:', error);
@@ -50,14 +60,15 @@ const AdminOrders = () => {
       fetchOrders();
     } catch (error) {
       console.error('Error updating order status:', error);
+      alert('Lỗi khi cập nhật trạng thái');
     }
   };
 
   const filteredOrders = orders.filter(order => {
     if (!searchTerm) return true;
-    return order.orderCode?.includes(searchTerm) ||
-      order.customer?.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      order.customer?.email?.toLowerCase().includes(searchTerm.toLowerCase());
+    return order.orderNumber?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      order.user?.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      order.user?.email?.toLowerCase().includes(searchTerm.toLowerCase());
   });
 
   if (loading) {
@@ -108,7 +119,7 @@ const AdminOrders = () => {
               onChange={(e) => setSelectedStatus(e.target.value)}
             >
               <option value="">Tất cả trạng thái</option>
-              {Object.entries(ORDER_STATUS).map(([key, status]) => (
+              {Object.entries(ORDER_STATUS_MAP).map(([key, status]) => (
                 <option key={key} value={key}>{status.text}</option>
               ))}
             </select>
@@ -140,18 +151,24 @@ const AdminOrders = () => {
             </tr>
           </thead>
           <tbody>
-            {filteredOrders.map(order => (
+            {filteredOrders.length === 0 ? (
+              <tr>
+                <td colSpan="8" style={{ textAlign: 'center', padding: '30px' }}>
+                  Không có đơn hàng nào
+                </td>
+              </tr>
+            ) : filteredOrders.map(order => (
               <tr key={order._id}>
                 <td className="order-code">
                   <Link to={`/admin/orders/${order._id}`}>
-                    #{order.orderCode}
+                    #{order.orderNumber || order._id?.slice(-6)}
                   </Link>
                 </td>
                 <td>
                   <div className="customer-info">
-                    <strong>{order.customer?.name}</strong>
-                    <small>{order.customer?.email}</small>
-                    <small>{order.customer?.phone}</small>
+                    <strong>{order.user?.name || 'N/A'}</strong>
+                    <small>{order.user?.email || ''}</small>
+                    <small>{order.user?.phone || ''}</small>
                   </div>
                 </td>
                 <td>{formatDate(order.createdAt)}</td>
@@ -162,11 +179,11 @@ const AdminOrders = () => {
                   </div>
                 </td>
                 <td className="total-price">
-                  {formatCurrency(order.totalAmount)}
+                  {formatCurrency(order.total || 0)}
                 </td>
                 <td>
                   <span className={`payment-status ${order.paymentStatus}`}>
-                    {order.paymentStatus === 'paid' ? 'Đã thanh toán' : 'Chưa thanh toán'}
+                    {order.paymentStatus === 'paid' ? '✅ Đã thanh toán' : '⏳ Chưa thanh toán'}
                   </span>
                 </td>
                 <td>
@@ -175,7 +192,7 @@ const AdminOrders = () => {
                     value={order.status}
                     onChange={(e) => handleStatusChange(order._id, e.target.value)}
                   >
-                    {Object.entries(ORDER_STATUS).map(([key, status]) => (
+                    {Object.entries(ORDER_STATUS_MAP).map(([key, status]) => (
                       <option key={key} value={key}>{status.text}</option>
                     ))}
                   </select>
