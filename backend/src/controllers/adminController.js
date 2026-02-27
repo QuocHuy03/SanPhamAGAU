@@ -228,7 +228,34 @@ const deleteUserByAdmin = asyncHandler(async (req, res) => {
 // @route   GET /api/admin/categories
 // @access  Private/Admin
 const getAllCategories = asyncHandler(async (req, res) => {
-  const categories = await Category.find().sort({ createdAt: -1 });
+  const filter = {};
+  if (req.query.search) {
+    filter.name = { $regex: req.query.search, $options: 'i' };
+  }
+
+  if (req.query.page || req.query.limit) {
+    const pageSize = Number(req.query.limit) || 10;
+    const page = Number(req.query.page) || 1;
+    const skip = pageSize * (page - 1);
+
+    const count = await Category.countDocuments(filter);
+    const categories = await Category.find(filter)
+      .sort({ createdAt: -1 })
+      .limit(pageSize)
+      .skip(skip);
+
+    return res.json({
+      status: 'success',
+      data: {
+        categories,
+        total: count,
+        page,
+        totalPages: Math.ceil(count / pageSize)
+      }
+    });
+  }
+
+  const categories = await Category.find(filter).sort({ createdAt: -1 });
 
   res.json({
     status: 'success',
@@ -333,16 +360,21 @@ const getAllOrders = asyncHandler(async (req, res) => {
   const status = req.query.status;
   const date = req.query.date;
 
-  const keyword = req.query.keyword
-    ? {
-      orderNumber: {
-        $regex: req.query.keyword,
-        $options: 'i',
-      },
-    }
-    : {};
+  const filter = {};
 
-  const filter = { ...keyword };
+  if (req.query.keyword) {
+    const userIds = await User.find({
+      $or: [
+        { name: { $regex: req.query.keyword, $options: 'i' } },
+        { email: { $regex: req.query.keyword, $options: 'i' } }
+      ]
+    }).distinct('_id');
+
+    filter.$or = [
+      { orderNumber: { $regex: req.query.keyword, $options: 'i' } },
+      { user: { $in: userIds } }
+    ];
+  }
   if (status) {
     filter.status = status;
   }

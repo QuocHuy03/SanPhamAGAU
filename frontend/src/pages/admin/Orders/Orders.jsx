@@ -39,7 +39,7 @@ const AdminOrders = () => {
 
   useEffect(() => {
     fetchOrders();
-  }, [pagination.current, selectedStatus, selectedDate]);
+  }, [pagination.current, pagination.pageSize, selectedStatus, selectedDate, searchTerm]);
 
   const fetchOrders = async () => {
     try {
@@ -48,7 +48,8 @@ const AdminOrders = () => {
         page: pagination.current,
         limit: pagination.pageSize,
         status: selectedStatus,
-        date: selectedDate ? selectedDate.format('YYYY-MM-DD') : ''
+        date: selectedDate ? selectedDate.format('YYYY-MM-DD') : '',
+        keyword: searchTerm
       });
 
       // Backend trả về response.data.data.orders
@@ -85,12 +86,7 @@ const AdminOrders = () => {
     }));
   };
 
-  const filteredOrders = orders.filter(order => {
-    if (!searchTerm) return true;
-    return order.orderNumber?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      order.user?.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      order.user?.email?.toLowerCase().includes(searchTerm.toLowerCase());
-  });
+  // Removed client-side filtering
 
   const columns = [
     {
@@ -272,7 +268,7 @@ const AdminOrders = () => {
 
       <Table
         columns={columns}
-        dataSource={filteredOrders}
+        dataSource={orders}
         rowKey="_id"
         loading={loading}
         size="middle"

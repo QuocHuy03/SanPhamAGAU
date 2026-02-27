@@ -26,16 +26,34 @@ const AdminProducts = () => {
   const [categories, setCategories] = useState([]);
   const navigate = useNavigate();
 
+  const [pagination, setPagination] = useState({
+    current: 1,
+    pageSize: 10,
+    total: 0
+  });
+
   useEffect(() => {
     fetchProducts();
+  }, [pagination.current, pagination.pageSize, searchTerm, selectedCategory]);
+
+  useEffect(() => {
     fetchCategories();
   }, []);
 
   const fetchProducts = async () => {
     try {
       setLoading(true);
-      const data = await productService.getAllProducts();
-      setProducts(data);
+      const data = await productService.getProductsWithPagination({
+        page: pagination.current,
+        limit: pagination.pageSize,
+        search: searchTerm,
+        category: selectedCategory
+      });
+      setProducts(data.data?.products || []);
+      setPagination(prev => ({
+        ...prev,
+        total: data.data?.pagination?.total || 0,
+      }));
     } catch (error) {
       message.error('Lỗi khi tải danh sách sản phẩm');
       console.error('Error fetching products:', error);
@@ -44,9 +62,17 @@ const AdminProducts = () => {
     }
   };
 
+  const handleTableChange = (newPagination) => {
+    setPagination(prev => ({
+      ...prev,
+      current: newPagination.current,
+      pageSize: newPagination.pageSize
+    }));
+  };
+
   const fetchCategories = async () => {
     try {
-      const data = await adminService.getCategories();
+      const data = await adminService.getAllCategories();
       setCategories(data);
     } catch (error) {
       console.error('Error fetching categories:', error);
@@ -78,18 +104,7 @@ const AdminProducts = () => {
     }
   };
 
-  const filteredProducts = products.filter(product => {
-    const matchesSearch = product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      product.description?.toLowerCase().includes(searchTerm.toLowerCase());
-
-    // category can be an object {_id, name, slug} or a string
-    const productCategorySlug = typeof product.category === 'object'
-      ? product.category?.slug
-      : product.categorySlug;
-
-    const matchesCategory = !selectedCategory || productCategorySlug === selectedCategory;
-    return matchesSearch && matchesCategory;
-  });
+  // Removed client-side filtering
 
   const columns = [
     {
@@ -221,15 +236,18 @@ const AdminProducts = () => {
 
       <Table
         columns={columns}
-        dataSource={filteredProducts}
+        dataSource={products}
         rowKey={(record) => record._id || record.id}
         loading={loading}
         size="middle"
         pagination={{
-          defaultPageSize: 10,
+          current: pagination.current,
+          pageSize: pagination.pageSize,
+          total: pagination.total,
           showSizeChanger: true,
           showTotal: (total) => `Tổng ${total} mục`
         }}
+        onChange={handleTableChange}
       />
     </div>
   );

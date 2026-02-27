@@ -1,10 +1,16 @@
 import api from './api';
 
 export const productService = {
-  // Get all products
+  // Get all products (returns array for legacy support)
   getAllProducts: async (params = {}) => {
     const response = await api.get('/products', { params });
     return response.data?.products || [];
+  },
+
+  // Get products with full pagination data
+  getProductsWithPagination: async (params = {}) => {
+    const response = await api.get('/products', { params });
+    return response.data;
   },
 
   // Get product by ID

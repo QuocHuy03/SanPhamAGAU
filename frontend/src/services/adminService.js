@@ -28,9 +28,14 @@ export const deleteUser = async (id) => {
 };
 
 // Category Management
-export const getAllCategories = async () => {
-  const response = await api.get('/admin/categories');
+export const getAllCategories = async (params = {}) => {
+  const response = await api.get('/admin/categories', { params });
   return response.data?.categories || [];
+};
+
+export const getCategoriesWithPagination = async (params = {}) => {
+  const response = await api.get('/admin/categories', { params });
+  return response.data;
 };
 
 export const createCategory = async (categoryData) => {
@@ -83,6 +88,7 @@ const adminService = {
   updateUser,
   deleteUser,
   getAllCategories,
+  getCategoriesWithPagination,
   createCategory,
   updateCategory,
   deleteCategory,

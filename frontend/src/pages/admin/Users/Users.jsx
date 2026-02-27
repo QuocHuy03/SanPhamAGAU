@@ -19,22 +19,44 @@ const Users = () => {
     const [users, setUsers] = useState([]);
     const [loading, setLoading] = useState(true);
     const [search, setSearch] = useState('');
+    const [pagination, setPagination] = useState({
+        current: 1,
+        pageSize: 10,
+        total: 0
+    });
 
     useEffect(() => {
         fetchUsers();
-    }, []);
+    }, [pagination.current, pagination.pageSize]); // Added pagination dependencies
 
     const fetchUsers = async () => {
         try {
             setLoading(true);
-            const data = await adminService.getAllUsers({ search });
+            const data = await adminService.getAllUsers({
+                search,
+                page: pagination.current,
+                limit: pagination.pageSize
+            });
+            // data contains: users, total, page, totalPages
             setUsers(data.users || []);
+            setPagination(prev => ({
+                ...prev,
+                total: data.total || 0,
+            }));
         } catch (error) {
             console.error('Error fetching users:', error);
             message.error('Lỗi khi tải danh sách người dùng');
         } finally {
             setLoading(false);
         }
+    };
+
+    const handleTableChange = (newPagination) => {
+        setPagination(prev => ({
+            ...prev,
+            current: newPagination.current,
+            pageSize: newPagination.pageSize
+        }));
     };
 
     const handleUpdateRole = async (userId, newRole) => {
@@ -185,10 +207,13 @@ const Users = () => {
                 loading={loading}
                 size="middle"
                 pagination={{
-                    defaultPageSize: 10,
+                    current: pagination.current,
+                    pageSize: pagination.pageSize,
+                    total: pagination.total,
                     showSizeChanger: true,
                     showTotal: (total) => `Tổng ${total} người dùng`
                 }}
+                onChange={handleTableChange}
             />
         </div>
     );

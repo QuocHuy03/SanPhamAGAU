@@ -24,21 +24,42 @@ const Categories = () => {
     const [submitLoading, setSubmitLoading] = useState(false);
     const [form] = Form.useForm();
 
+    const [pagination, setPagination] = useState({
+        current: 1,
+        pageSize: 10,
+        total: 0
+    });
+
     useEffect(() => {
         fetchCategories();
-    }, []);
+    }, [pagination.current, pagination.pageSize]);
 
     const fetchCategories = async () => {
         try {
             setLoading(true);
-            const data = await adminService.getAllCategories();
-            setCategories(data || []);
+            const data = await adminService.getCategoriesWithPagination({
+                page: pagination.current,
+                limit: pagination.pageSize
+            });
+            setCategories(data.data?.categories || data.categories || []);
+            setPagination(prev => ({
+                ...prev,
+                total: data.data?.total || data.total || 0,
+            }));
         } catch (error) {
             console.error('Error:', error);
             message.error('Lỗi khi tải danh mục');
         } finally {
             setLoading(false);
         }
+    };
+
+    const handleTableChange = (newPagination) => {
+        setPagination(prev => ({
+            ...prev,
+            current: newPagination.current,
+            pageSize: newPagination.pageSize
+        }));
     };
 
     const handleOpenModal = (category = null) => {
@@ -175,10 +196,13 @@ const Categories = () => {
                 loading={loading}
                 size="middle"
                 pagination={{
-                    defaultPageSize: 10,
+                    current: pagination.current,
+                    pageSize: pagination.pageSize,
+                    total: pagination.total,
                     showSizeChanger: true,
                     showTotal: (total) => `Tổng ${total} danh mục`
                 }}
+                onChange={handleTableChange}
             />
 
             <Modal
