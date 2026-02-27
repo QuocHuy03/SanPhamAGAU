@@ -194,6 +194,7 @@ const ProductEdit = () => {
                     <Button
                         icon={<ArrowLeftOutlined />}
                         onClick={() => navigate('/admin/products')}
+                        size="large"
                     >
                         Quay lại
                     </Button>
@@ -206,6 +207,7 @@ const ProductEdit = () => {
                     icon={<SaveOutlined />}
                     loading={submitLoading}
                     onClick={() => form.submit()}
+                    size="large"
                 >
                     {isAddMode ? 'Tạo sản phẩm' : 'Lưu thay đổi'}
                 </Button>
@@ -214,6 +216,7 @@ const ProductEdit = () => {
             <Form
                 form={form}
                 layout="vertical"
+                size="large"
                 onFinish={onFinish}
                 initialValues={{ status: 'active', featured: false }}
             >

@@ -90,7 +90,15 @@ const AdminOrders = () => {
 
   const columns = [
     {
+      title: 'STT',
+      key: 'stt',
+      render: (text, record, index) => (pagination.current - 1) * pagination.pageSize + index + 1,
+      width: 70,
+      align: 'center',
+    },
+    {
       title: 'Mã đơn',
+      align: 'center',
       dataIndex: 'orderNumber',
       key: 'orderNumber',
       render: (text, record) => (
@@ -101,6 +109,7 @@ const AdminOrders = () => {
     },
     {
       title: 'Khách hàng',
+      align: 'center',
       key: 'customer',
       render: (_, record) => (
         <Space direction="vertical" size={0}>
@@ -112,23 +121,27 @@ const AdminOrders = () => {
     },
     {
       title: 'Ngày đặt',
+      align: 'center',
       dataIndex: 'createdAt',
       key: 'createdAt',
       render: (date) => formatDate(date),
     },
     {
       title: 'Sản phẩm',
+      align: 'center',
       key: 'items',
       render: (_, record) => `${record.items?.length || 0} sản phẩm`,
     },
     {
       title: 'Tổng tiền',
+      align: 'center',
       dataIndex: 'total',
       key: 'total',
       render: (total) => <Text strong>{formatCurrency(total || 0)}</Text>,
     },
     {
       title: 'Thanh toán',
+      align: 'center',
       dataIndex: 'paymentStatus',
       key: 'paymentStatus',
       render: (status) => (
@@ -139,6 +152,7 @@ const AdminOrders = () => {
     },
     {
       title: 'Trạng thái',
+      align: 'center',
       key: 'status',
       render: (_, record) => (
         <Select
@@ -159,6 +173,7 @@ const AdminOrders = () => {
     },
     {
       title: 'Thao tác',
+      align: 'center',
       key: 'action',
       render: (_, record) => (
         <Space size="small">
@@ -240,6 +255,7 @@ const AdminOrders = () => {
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             allowClear
+            size="large"
           />
         </Col>
         <Col xs={24} sm={6} md={8}>
@@ -249,6 +265,7 @@ const AdminOrders = () => {
             value={selectedStatus || undefined}
             onChange={setSelectedStatus}
             allowClear
+            size="large"
           >
             {Object.entries(ORDER_STATUS_MAP).map(([key, status]) => (
               <Option key={key} value={key}>{status.text}</Option>
@@ -262,11 +279,13 @@ const AdminOrders = () => {
             onChange={setSelectedDate}
             placeholder="Chọn ngày đặt"
             format="DD/MM/YYYY"
+            size="large"
           />
         </Col>
       </Row>
 
       <Table
+        rowSelection={{ type: 'checkbox' }}
         columns={columns}
         dataSource={orders}
         rowKey="_id"

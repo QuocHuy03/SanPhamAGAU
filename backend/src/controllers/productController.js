@@ -1,4 +1,5 @@
 const Product = require('../models/Product');
+const Category = require('../models/Category');
 const asyncHandler = require('express-async-handler');
 const cloudinary = require('../config/cloudinary');
 
@@ -15,7 +16,25 @@ const getProducts = asyncHandler(async (req, res) => {
 
     // Category filter
     if (req.query.category) {
-        filter.category = req.query.category;
+        // Resolve category slug to ID
+        const categoryDoc = await Category.findOne({ slug: req.query.category });
+        if (categoryDoc) {
+            filter.category = categoryDoc._id;
+        } else {
+            // Check if it's already a valid ObjectId (fallback)
+            if (req.query.category.match(/^[0-9a-fA-F]{24}$/)) {
+                filter.category = req.query.category;
+            } else {
+                // Return empty result if category not found
+                return res.json({
+                    status: 'success',
+                    data: {
+                        products: [],
+                        pagination: { page, limit, total: 0, totalPages: 0, hasNextPage: false, hasPrevPage: false }
+                    }
+                });
+            }
+        }
     }
 
     // Brand filter
@@ -228,7 +247,7 @@ const createProduct = asyncHandler(async (req, res) => {
         stock,
         tags,
         specifications,
-        sku,
+        sku: sku || `SKU-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
         weight,
         dimensions,
         featured,
@@ -264,6 +283,8 @@ const updateProduct = asyncHandler(async (req, res) => {
 
     allowedFields.forEach(field => {
         if (req.body[field] !== undefined) {
+            // Do not override sku to empty if already exists
+            if (field === 'sku' && !req.body[field]) return;
             product[field] = req.body[field];
         }
     });
@@ -328,9 +349,10 @@ const uploadProductImages = asyncHandler(async (req, res) => {
     }
 
     const uploadedImages = [];
+    const errors = [];
 
-    // Upload each file to Cloudinary
-    for (const file of req.files) {
+    // Upload all files concurrently to Cloudinary
+    const uploadPromises = req.files.map(async (file) => {
         try {
             // Convert buffer to base64
             const b64 = Buffer.from(file.buffer).toString('base64');
@@ -341,13 +363,28 @@ const uploadProductImages = asyncHandler(async (req, res) => {
                 resource_type: 'auto'
             });
 
-            uploadedImages.push({
+            return {
                 url: result.secure_url,
                 public_id: result.public_id
-            });
+            };
         } catch (error) {
-            console.error('Error uploading to Cloudinary:', error);
+            console.error('Error uploading file to Cloudinary:', error);
+            errors.push(error.message || 'Unknown Cloudinary Error');
+            return null;
         }
+    });
+
+    // Wait for all uploads to finish
+    const results = await Promise.all(uploadPromises);
+
+    // Filter out failed uploads
+    results.forEach(res => {
+        if (res) uploadedImages.push(res);
+    });
+
+    if (errors.length > 0 && uploadedImages.length === 0) {
+        res.status(500);
+        throw new Error(`Cloudinary Upload Failed: ${errors.join(', ')}`);
     }
 
     // Add images to product

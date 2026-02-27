@@ -49,10 +49,11 @@ const AdminProducts = () => {
         search: searchTerm,
         category: selectedCategory
       });
-      setProducts(data.data?.products || []);
+      console.log('API Response:', data); // Giữ lại log để debug
+      setProducts(data?.products || data?.data?.products || []);
       setPagination(prev => ({
         ...prev,
-        total: data.data?.pagination?.total || 0,
+        total: data?.pagination?.total || data?.data?.pagination?.total || 0,
       }));
     } catch (error) {
       message.error('Lỗi khi tải danh sách sản phẩm');
@@ -95,7 +96,7 @@ const AdminProducts = () => {
 
   const handleDelete = async (id) => {
     try {
-      await adminService.deleteProduct(id);
+      await productService.deleteProduct(id);
       setProducts(products.filter(p => (p._id || p.id) !== id));
       message.success('Đã xóa sản phẩm thành công');
     } catch (error) {
@@ -108,22 +109,37 @@ const AdminProducts = () => {
 
   const columns = [
     {
+      title: 'STT',
+      key: 'stt',
+      render: (text, record, index) => (pagination.current - 1) * pagination.pageSize + index + 1,
+      width: 70,
+      align: 'center',
+    },
+    {
       title: 'Hình ảnh',
+      align: 'center',
       dataIndex: 'images',
       key: 'images',
-      render: (images) => (
-        <Image
-          src={images && images.length > 0 ? images[0] : ''}
-          alt="product"
-          width={60}
-          height={60}
-          style={{ objectFit: 'cover', borderRadius: '4px' }}
-          fallback="https://via.placeholder.com/60"
-        />
-      ),
+      render: (images) => {
+        let imgSrc = '';
+        if (images && images.length > 0) {
+          imgSrc = typeof images[0] === 'string' ? images[0] : images[0]?.url;
+        }
+        return (
+          <Image
+            src={imgSrc || ''}
+            alt="product"
+            width={60}
+            height={60}
+            style={{ objectFit: 'cover', borderRadius: '4px' }}
+            fallback="https://via.placeholder.com/60?text=No+Image"
+          />
+        );
+      },
     },
     {
       title: 'Tên sản phẩm',
+      align: 'center',
       dataIndex: 'name',
       key: 'name',
       render: (text, record) => (
@@ -136,12 +152,14 @@ const AdminProducts = () => {
     },
     {
       title: 'Danh mục',
+      align: 'center',
       dataIndex: 'category',
       key: 'category',
       render: (category) => typeof category === 'object' ? category?.name : category,
     },
     {
       title: 'Giá',
+      align: 'center',
       dataIndex: 'price',
       key: 'price',
       render: (price) => formatCurrency(price),
@@ -149,12 +167,14 @@ const AdminProducts = () => {
     },
     {
       title: 'Giá KM',
+      align: 'center',
       dataIndex: 'discountPrice',
       key: 'discountPrice',
       render: (discountPrice) => discountPrice ? <Typography.Text type="danger">{formatCurrency(discountPrice)}</Typography.Text> : '-',
     },
     {
       title: 'Trạng thái',
+      align: 'center',
       key: 'status',
       render: (_, record) => (
         <Tag color={record.inStock ? 'green' : 'red'}>
@@ -169,6 +189,7 @@ const AdminProducts = () => {
     },
     {
       title: 'Thao tác',
+      align: 'center',
       key: 'action',
       render: (_, record) => {
         const id = record._id || record.id;
@@ -205,6 +226,7 @@ const AdminProducts = () => {
           type="primary"
           icon={<PlusOutlined />}
           onClick={() => navigate('/admin/products/add')}
+          size="large"
         >
           Thêm sản phẩm
         </Button>
@@ -218,6 +240,7 @@ const AdminProducts = () => {
           onChange={(e) => setSearchTerm(e.target.value)}
           style={{ width: 300 }}
           allowClear
+          size="large"
         />
         <Select
           style={{ width: 200 }}
@@ -225,6 +248,7 @@ const AdminProducts = () => {
           value={selectedCategory || undefined}
           onChange={setSelectedCategory}
           allowClear
+          size="large"
         >
           {categories.map(category => (
             <Option key={category._id || category.id} value={category.slug}>
@@ -235,6 +259,7 @@ const AdminProducts = () => {
       </div>
 
       <Table
+        rowSelection={{ type: 'checkbox' }}
         columns={columns}
         dataSource={products}
         rowKey={(record) => record._id || record.id}

@@ -128,7 +128,15 @@ const Categories = () => {
 
     const columns = [
         {
+            title: 'STT',
+            key: 'stt',
+            render: (text, record, index) => (pagination.current - 1) * pagination.pageSize + index + 1,
+            width: 70,
+            align: 'center',
+        },
+        {
             title: 'Tên danh mục',
+            align: 'center',
             dataIndex: 'name',
             key: 'name',
             render: (text) => <Typography.Text strong>{text}</Typography.Text>,
@@ -136,18 +144,21 @@ const Categories = () => {
         },
         {
             title: 'Slug',
+            align: 'center',
             dataIndex: 'slug',
             key: 'slug',
             render: (slug) => <Text type="secondary">/{slug}</Text>
         },
         {
             title: 'Mô tả',
+            align: 'center',
             dataIndex: 'description',
             key: 'description',
             ellipsis: true,
         },
         {
             title: 'Thao tác',
+            align: 'center',
             key: 'action',
             render: (_, record) => (
                 <Space size="middle">
@@ -184,12 +195,14 @@ const Categories = () => {
                     type="primary"
                     icon={<PlusOutlined />}
                     onClick={() => handleOpenModal()}
+                    size="large"
                 >
                     Thêm danh mục
                 </Button>
             </div>
 
             <Table
+                rowSelection={{ type: 'checkbox' }}
                 columns={columns}
                 dataSource={categories}
                 rowKey="_id"
@@ -215,6 +228,7 @@ const Categories = () => {
                 <Form
                     form={form}
                     layout="vertical"
+                    size="large"
                     onFinish={handleSubmit}
                 >
                     <Form.Item

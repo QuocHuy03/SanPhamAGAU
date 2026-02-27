@@ -4,7 +4,7 @@ import { toast } from 'react-hot-toast';
 // Create axios instance - SỬA BASE URL
 const api = axios.create({
   baseURL: process.env.REACT_APP_API_URL || 'http://localhost:2000/api',
-  timeout: 15000, // Tăng timeout
+  timeout: 60000, // Tăng timeout lên 60s để chịu tải upload nhiều ảnh
   headers: {
     'Content-Type': 'application/json',
   },
@@ -18,7 +18,7 @@ api.interceptors.request.use(
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
-    
+
     // Log request cho debug
     console.log(`🌐 API Request: ${config.method?.toUpperCase()} ${config.baseURL}${config.url}`);
     return config;
@@ -37,14 +37,14 @@ api.interceptors.response.use(
   },
   (error) => {
     const { response, request, message } = error;
-    
+
     console.error('❌ API Error:', {
       url: error.config?.url,
       status: response?.status,
       message: message,
       data: response?.data
     });
-    
+
     if (response) {
       switch (response.status) {
         case 401:
@@ -55,19 +55,19 @@ api.interceptors.response.use(
             toast.error('Phiên đăng nhập đã hết hạn');
           }
           break;
-          
+
         case 403:
           toast.error('Bạn không có quyền truy cập');
           break;
-          
+
         case 404:
           toast.error('Không tìm thấy tài nguyên');
           break;
-          
+
         case 500:
           toast.error('Lỗi máy chủ');
           break;
-          
+
         default:
           if (response.data?.message) {
             toast.error(response.data.message);
@@ -81,7 +81,7 @@ api.interceptors.response.use(
     } else if (message.includes('timeout')) {
       toast.error('Yêu cầu quá thời gian chờ');
     }
-    
+
     return Promise.reject(error);
   }
 );

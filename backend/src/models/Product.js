@@ -98,6 +98,7 @@ const productSchema = new mongoose.Schema({
   sku: {
     type: String,
     unique: true,
+    sparse: true,
     uppercase: true
   },
   weight: Number,

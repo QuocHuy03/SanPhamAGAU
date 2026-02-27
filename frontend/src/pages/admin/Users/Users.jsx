@@ -91,7 +91,15 @@ const Users = () => {
 
     const columns = [
         {
+            title: 'STT',
+            key: 'stt',
+            render: (text, record, index) => (pagination.current - 1) * pagination.pageSize + index + 1,
+            width: 70,
+            align: 'center',
+        },
+        {
             title: 'ID',
+            align: 'center',
             dataIndex: '_id',
             key: 'id',
             render: (text) => <Text type="secondary">#{text.slice(-6)}</Text>,
@@ -99,6 +107,7 @@ const Users = () => {
         },
         {
             title: 'Người dùng',
+            align: 'center',
             key: 'user',
             render: (_, record) => (
                 <Space direction="vertical" size={0}>
@@ -110,6 +119,7 @@ const Users = () => {
         },
         {
             title: 'Quyền',
+            align: 'center',
             dataIndex: 'role',
             key: 'role',
             render: (role, record) => (
@@ -132,6 +142,7 @@ const Users = () => {
         },
         {
             title: 'Trạng thái',
+            align: 'center',
             dataIndex: 'isActive',
             key: 'isActive',
             render: (isActive) => (
@@ -143,6 +154,7 @@ const Users = () => {
         },
         {
             title: 'Ngày tạo',
+            align: 'center',
             dataIndex: 'createdAt',
             key: 'createdAt',
             render: (date) => formatDate(date),
@@ -150,6 +162,7 @@ const Users = () => {
         },
         {
             title: 'Thao tác',
+            align: 'center',
             key: 'action',
             render: (_, record) => (
                 <Space size="middle">
@@ -194,13 +207,15 @@ const Users = () => {
                     prefix={<SearchOutlined />}
                     style={{ maxWidth: 400 }}
                     allowClear
+                    size="large"
                 />
-                <Button type="primary" onClick={fetchUsers} icon={<SearchOutlined />}>
+                <Button type="primary" onClick={fetchUsers} icon={<SearchOutlined />} size="large">
                     Tìm kiếm
                 </Button>
             </div>
 
             <Table
+                rowSelection={{ type: 'checkbox' }}
                 columns={columns}
                 dataSource={users}
                 rowKey="_id"

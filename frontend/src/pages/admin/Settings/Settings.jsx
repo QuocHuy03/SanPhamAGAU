@@ -70,6 +70,7 @@ const Settings = () => {
                     icon={<SaveOutlined />}
                     loading={saving}
                     onClick={() => form.submit()}
+                    size="large"
                 >
                     Lưu cài đặt
                 </Button>
@@ -78,6 +79,7 @@ const Settings = () => {
             <Form
                 form={form}
                 layout="vertical"
+                size="large"
                 onFinish={handleSubmit}
             >
                 <Row gutter={24}>
