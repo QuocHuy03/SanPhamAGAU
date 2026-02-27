@@ -1,20 +1,16 @@
 import React, { useState, useEffect } from 'react';
+import { Form, Input, InputNumber, Select, Card, Button, Typography, message, Spin, Row, Col, Space } from 'antd';
+import { SaveOutlined } from '@ant-design/icons';
 import { adminService } from '../../../services/adminService';
-import './Settings.css';
+// import './Settings.css'; // Removed old CSS
+
+const { Title } = Typography;
+const { Option } = Select;
 
 const Settings = () => {
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
-    const [formData, setFormData] = useState({
-        siteName: 'ShopThoiTrang',
-        email: 'admin@shopthoitrang.com',
-        phone: '0123456789',
-        address: 'Hanoi, Vietnam',
-        currency: 'VND',
-        shippingFee: 30000,
-        freeShippingThreshold: 500000,
-        defaultLanguage: 'vi'
-    });
+    const [form] = Form.useForm();
 
     useEffect(() => {
         fetchSettings();
@@ -26,120 +22,148 @@ const Settings = () => {
             const result = await adminService.getSettings();
             const settings = result?.data?.settings || result?.settings || result;
             if (settings) {
-                setFormData(prev => ({ ...prev, ...settings }));
+                form.setFieldsValue({
+                    siteName: settings.siteName || 'ShopThoiTrang',
+                    email: settings.email || 'admin@shopthoitrang.com',
+                    phone: settings.phone || '0123456789',
+                    address: settings.address || 'Hanoi, Vietnam',
+                    currency: settings.currency || 'VND',
+                    shippingFee: settings.shippingFee || 30000,
+                    freeShippingThreshold: settings.freeShippingThreshold || 500000,
+                    defaultLanguage: settings.defaultLanguage || 'vi'
+                });
             }
         } catch (error) {
             console.error('Error fetching settings:', error);
+            message.error('Lỗi khi tải cài đặt');
         } finally {
             setLoading(false);
         }
     };
 
-    const handleChange = (e) => {
-        const { name, value } = e.target;
-        setFormData(prev => ({
-            ...prev,
-            [name]: name === 'shippingFee' || name === 'freeShippingThreshold'
-                ? Number(value)
-                : value
-        }));
-    };
-
-    const handleSubmit = async (e) => {
-        e.preventDefault();
+    const handleSubmit = async (values) => {
         setSaving(true);
         try {
-            await adminService.updateSettings(formData);
-            alert('✅ Lưu cài đặt thành công!');
+            await adminService.updateSettings(values);
+            message.success('Lưu cài đặt thành công!');
         } catch (error) {
-            alert(error.response?.data?.message || 'Lỗi khi lưu cài đặt');
+            message.error(error.response?.data?.message || 'Lỗi khi lưu cài đặt');
         } finally {
             setSaving(false);
         }
     };
 
-    if (loading) return <div style={{ padding: 40, textAlign: 'center' }}>Đang tải cài đặt...</div>;
+    if (loading) {
+        return (
+            <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%', minHeight: 400 }}>
+                <Spin size="large" tip="Đang tải cài đặt..." />
+            </div>
+        );
+    }
 
     return (
-        <div className="admin-settings">
-            <div className="page-header">
-                <h1>Cài đặt hệ thống</h1>
+        <div>
+            <div style={{ marginBottom: 24, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <Title level={2} style={{ margin: 0 }}>Cài đặt hệ thống</Title>
+                <Button
+                    type="primary"
+                    icon={<SaveOutlined />}
+                    loading={saving}
+                    onClick={() => form.submit()}
+                >
+                    Lưu cài đặt
+                </Button>
             </div>
 
-            <div className="settings-container">
-                <form onSubmit={handleSubmit} className="settings-form">
-                    <div className="form-section">
-                        <h3>Thông tin chung</h3>
-                        <div className="form-group">
-                            <label>Tên cửa hàng</label>
-                            <input type="text" name="siteName" value={formData.siteName} onChange={handleChange} />
-                        </div>
-                        <div className="form-group">
-                            <label>Email nhận phản hồi</label>
-                            <input type="email" name="email" value={formData.email} onChange={handleChange} />
-                        </div>
-                        <div className="form-group">
-                            <label>Số điện thoại liên hệ</label>
-                            <input type="text" name="phone" value={formData.phone} onChange={handleChange} />
-                        </div>
-                        <div className="form-group">
-                            <label>Địa chỉ</label>
-                            <input type="text" name="address" value={formData.address} onChange={handleChange} />
-                        </div>
-                    </div>
+            <Form
+                form={form}
+                layout="vertical"
+                onFinish={handleSubmit}
+            >
+                <Row gutter={24}>
+                    <Col xs={24} lg={16}>
+                        <Space direction="vertical" size="large" style={{ width: '100%' }}>
+                            <Card title="Thông tin chung" bordered={false}>
+                                <Row gutter={16}>
+                                    <Col xs={24} md={12}>
+                                        <Form.Item name="siteName" label="Tên cửa hàng" rules={[{ required: true, message: 'Vui lòng nhập tên cửa hàng!' }]}>
+                                            <Input placeholder="Nhập tên cửa hàng" />
+                                        </Form.Item>
+                                    </Col>
+                                    <Col xs={24} md={12}>
+                                        <Form.Item name="email" label="Email nhận phản hồi" rules={[{ required: true, type: 'email', message: 'Vui lòng nhập email hợp lệ!' }]}>
+                                            <Input placeholder="admin@example.com" />
+                                        </Form.Item>
+                                    </Col>
+                                    <Col xs={24} md={12}>
+                                        <Form.Item name="phone" label="Số điện thoại liên hệ" rules={[{ required: true, message: 'Vui lòng nhập số điện thoại!' }]}>
+                                            <Input placeholder="0123456789" />
+                                        </Form.Item>
+                                    </Col>
+                                    <Col xs={24} md={12}>
+                                        <Form.Item name="address" label="Địa chỉ">
+                                            <Input placeholder="Nhập địa chỉ cửa hàng" />
+                                        </Form.Item>
+                                    </Col>
+                                </Row>
+                            </Card>
 
-                    <div className="form-section">
-                        <h3>Cấu hình bán hàng</h3>
-                        <div className="form-group">
-                            <label>Đơn vị tiền tệ</label>
-                            <select name="currency" value={formData.currency} onChange={handleChange}>
-                                <option value="VND">VND (₫ Việt Nam đồng)</option>
-                                <option value="USD">USD ($ Đô la Mỹ)</option>
-                                <option value="CNY">CNY (¥ Nhân dân tệ)</option>
-                            </select>
-                        </div>
-                        <div className="form-group">
-                            <label>Phí vận chuyển mặc định (VND)</label>
-                            <input
-                                type="number"
-                                name="shippingFee"
-                                value={formData.shippingFee}
-                                onChange={handleChange}
-                                min="0"
-                            />
-                        </div>
-                        <div className="form-group">
-                            <label>Ngưỡng miễn phí vận chuyển (VND)</label>
-                            <input
-                                type="number"
-                                name="freeShippingThreshold"
-                                value={formData.freeShippingThreshold}
-                                onChange={handleChange}
-                                min="0"
-                            />
-                            <small style={{ color: '#888', fontSize: 12 }}>
-                                Đơn hàng trên mức này sẽ được miễn phí vận chuyển
-                            </small>
-                        </div>
-                    </div>
+                            <Card title="Cấu hình bán hàng" bordered={false}>
+                                <Row gutter={16}>
+                                    <Col xs={24} md={12}>
+                                        <Form.Item name="shippingFee" label="Phí vận chuyển mặc định (VND)" rules={[{ required: true, message: 'Vui lòng nhập phí vận chuyển!' }]}>
+                                            <InputNumber
+                                                style={{ width: '100%' }}
+                                                min={0}
+                                                formatter={value => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
+                                                parser={value => value.replace(/\$\s?|(,*)/g, '')}
+                                                addonAfter="₫"
+                                            />
+                                        </Form.Item>
+                                    </Col>
+                                    <Col xs={24} md={12}>
+                                        <Form.Item
+                                            name="freeShippingThreshold"
+                                            label="Ngưỡng miễn phí vận chuyển (VND)"
+                                            rules={[{ required: true, message: 'Vui lòng nhập ngưỡng miễn phí vận chuyển!' }]}
+                                            extra="Đơn hàng có tổng giá trị trên mức này sẽ được miễn phí vận chuyển."
+                                        >
+                                            <InputNumber
+                                                style={{ width: '100%' }}
+                                                min={0}
+                                                formatter={value => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
+                                                parser={value => value.replace(/\$\s?|(,*)/g, '')}
+                                                addonAfter="₫"
+                                            />
+                                        </Form.Item>
+                                    </Col>
+                                </Row>
+                            </Card>
+                        </Space>
+                    </Col>
 
-                    <div className="form-section">
-                        <h3>Ngôn ngữ mặc định</h3>
-                        <div className="form-group">
-                            <label>Ngôn ngữ hiển thị</label>
-                            <select name="defaultLanguage" value={formData.defaultLanguage} onChange={handleChange}>
-                                <option value="vi">🇻🇳 Tiếng Việt</option>
-                                <option value="en">🇺🇸 English</option>
-                                <option value="zh">🇨🇳 中文</option>
-                            </select>
-                        </div>
-                    </div>
-
-                    <button type="submit" className="btn-save" disabled={saving}>
-                        {saving ? '⏳ Đang lưu...' : '💾 Lưu cài đặt'}
-                    </button>
-                </form>
-            </div>
+                    <Col xs={24} lg={8}>
+                        <Space direction="vertical" size="large" style={{ width: '100%' }}>
+                            <Card title="Quốc tế hóa" bordered={false}>
+                                <Form.Item name="currency" label="Đơn vị tiền tệ">
+                                    <Select>
+                                        <Option value="VND">VND (₫ Việt Nam đồng)</Option>
+                                        <Option value="USD">USD ($ Đô la Mỹ)</Option>
+                                        <Option value="CNY">CNY (¥ Nhân dân tệ)</Option>
+                                    </Select>
+                                </Form.Item>
+                                <Form.Item name="defaultLanguage" label="Ngôn ngữ hiển thị mặc định">
+                                    <Select>
+                                        <Option value="vi">🇻🇳 Tiếng Việt</Option>
+                                        <Option value="en">🇺🇸 English</Option>
+                                        <Option value="zh">🇨🇳 中文</Option>
+                                    </Select>
+                                </Form.Item>
+                            </Card>
+                        </Space>
+                    </Col>
+                </Row>
+            </Form>
         </div>
     );
 };

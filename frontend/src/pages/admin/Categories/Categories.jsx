@@ -1,6 +1,10 @@
 import React, { useState, useEffect } from 'react';
+import { Table, Button, Modal, Form, Input, Space, Typography, message, Popconfirm } from 'antd';
+import { PlusOutlined, EditOutlined, DeleteOutlined, ReloadOutlined } from '@ant-design/icons';
 import adminService from '../../../services/adminService';
-import './Categories.css';
+// import './Categories.css'; // Removed old CSS
+
+const { Title, Text } = Typography;
 
 const generateSlug = (name) =>
     name
@@ -17,12 +21,8 @@ const Categories = () => {
     const [loading, setLoading] = useState(true);
     const [showModal, setShowModal] = useState(false);
     const [editCategory, setEditCategory] = useState(null);
-    const [formData, setFormData] = useState({
-        name: '',
-        slug: '',
-        description: '',
-        image: ''
-    });
+    const [submitLoading, setSubmitLoading] = useState(false);
+    const [form] = Form.useForm();
 
     useEffect(() => {
         fetchCategories();
@@ -35,172 +35,217 @@ const Categories = () => {
             setCategories(data || []);
         } catch (error) {
             console.error('Error:', error);
-            alert('Lỗi khi tải danh mục');
+            message.error('Lỗi khi tải danh mục');
         } finally {
             setLoading(false);
         }
     };
 
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-
-        try {
-            if (editCategory) {
-                await adminService.updateCategory(editCategory._id, formData);
-                alert('Cập nhật danh mục thành công!');
-            } else {
-                await adminService.createCategory(formData);
-                alert('Tạo danh mục thành công!');
-            }
-
-            setShowModal(false);
-            setEditCategory(null);
-            setFormData({ name: '', slug: '', description: '', image: '' });
-            fetchCategories();
-        } catch (error) {
-            alert(error.response?.data?.message || 'Có lỗi xảy ra');
+    const handleOpenModal = (category = null) => {
+        setEditCategory(category);
+        if (category) {
+            form.setFieldsValue({
+                name: category.name,
+                slug: category.slug,
+                description: category.description || '',
+                image: category.image || ''
+            });
+        } else {
+            form.resetFields();
         }
+        setShowModal(true);
     };
 
-    const handleEdit = (category) => {
-        setEditCategory(category);
-        setFormData({
-            name: category.name,
-            slug: category.slug,
-            description: category.description || '',
-            image: category.image || ''
-        });
-        setShowModal(true);
+    const handleCloseModal = () => {
+        setShowModal(false);
+        form.resetFields();
+        setEditCategory(null);
+    };
+
+    const handleSubmit = async (values) => {
+        setSubmitLoading(true);
+        try {
+            if (editCategory) {
+                await adminService.updateCategory(editCategory._id, values);
+                message.success('Cập nhật danh mục thành công!');
+            } else {
+                await adminService.createCategory(values);
+                message.success('Tạo danh mục thành công!');
+            }
+            handleCloseModal();
+            fetchCategories();
+        } catch (error) {
+            message.error(error.response?.data?.message || 'Có lỗi xảy ra');
+        } finally {
+            setSubmitLoading(false);
+        }
     };
 
     const handleDelete = async (id) => {
-        if (!window.confirm('Bạn có chắc muốn xóa danh mục này?')) return;
-
         try {
             await adminService.deleteCategory(id);
-            alert('Xóa danh mục thành công!');
+            message.success('Xóa danh mục thành công!');
             fetchCategories();
         } catch (error) {
-            alert(error.response?.data?.message || 'Lỗi khi xóa');
+            message.error(error.response?.data?.message || 'Lỗi khi xóa');
         }
     };
 
-    const handleAddNew = () => {
-        setEditCategory(null);
-        setFormData({ name: '', slug: '', description: '', image: '' });
-        setShowModal(true);
-    };
-
-    const handleNameChange = (value) => {
-        setFormData(prev => ({
-            ...prev,
-            name: value,
-            // Auto-gen slug chỉ khi thêm mới (editCategory null)
-            ...(!editCategory ? { slug: generateSlug(value) } : {})
-        }));
+    const handleNameChange = (e) => {
+        const value = e.target.value;
+        if (!editCategory && value) {
+            form.setFieldValue('slug', generateSlug(value));
+        }
     };
 
     const handleRegenerateSlug = () => {
-        setFormData(prev => ({ ...prev, slug: generateSlug(prev.name) }));
+        const name = form.getFieldValue('name');
+        if (name) {
+            form.setFieldValue('slug', generateSlug(name));
+        }
     };
 
-    if (loading) return <div className="loading">Đang tải...</div>;
+    const columns = [
+        {
+            title: 'Tên danh mục',
+            dataIndex: 'name',
+            key: 'name',
+            render: (text) => <Typography.Text strong>{text}</Typography.Text>,
+            sorter: (a, b) => a.name.localeCompare(b.name),
+        },
+        {
+            title: 'Slug',
+            dataIndex: 'slug',
+            key: 'slug',
+            render: (slug) => <Text type="secondary">/{slug}</Text>
+        },
+        {
+            title: 'Mô tả',
+            dataIndex: 'description',
+            key: 'description',
+            ellipsis: true,
+        },
+        {
+            title: 'Thao tác',
+            key: 'action',
+            render: (_, record) => (
+                <Space size="middle">
+                    <Button
+                        type="text"
+                        icon={<EditOutlined />}
+                        style={{ color: '#1677ff' }}
+                        onClick={() => handleOpenModal(record)}
+                    >
+                        Sửa
+                    </Button>
+                    <Popconfirm
+                        title="Xóa danh mục"
+                        description="Bạn có chắc chắn muốn xóa danh mục này?"
+                        onConfirm={() => handleDelete(record._id)}
+                        okText="Xóa"
+                        cancelText="Hủy"
+                        okButtonProps={{ danger: true }}
+                    >
+                        <Button type="text" danger icon={<DeleteOutlined />}>
+                            Xóa
+                        </Button>
+                    </Popconfirm>
+                </Space>
+            ),
+        },
+    ];
 
     return (
-        <div className="admin-categories">
-            <div className="page-header">
-                <h1>Quản lý danh mục</h1>
-                <button onClick={handleAddNew} className="btn-add">➕ Thêm danh mục</button>
+        <div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
+                <Title level={2} style={{ margin: 0 }}>Quản lý danh mục</Title>
+                <Button
+                    type="primary"
+                    icon={<PlusOutlined />}
+                    onClick={() => handleOpenModal()}
+                >
+                    Thêm danh mục
+                </Button>
             </div>
 
-            <div className="categories-grid">
-                {categories.map(cat => (
-                    <div key={cat._id} className="category-card">
-                        <div className="category-info">
-                            <h3>{cat.name}</h3>
-                            <p className="slug">/{cat.slug}</p>
-                            {cat.description && <p className="desc">{cat.description}</p>}
-                        </div>
-                        <div className="category-actions">
-                            <button onClick={() => handleEdit(cat)} className="btn-edit">✏️</button>
-                            <button onClick={() => handleDelete(cat._id)} className="btn-delete">🗑️</button>
-                        </div>
-                    </div>
-                ))}
-            </div>
+            <Table
+                columns={columns}
+                dataSource={categories}
+                rowKey="_id"
+                loading={loading}
+                size="middle"
+                pagination={{
+                    defaultPageSize: 10,
+                    showSizeChanger: true,
+                    showTotal: (total) => `Tổng ${total} danh mục`
+                }}
+            />
 
-            {categories.length === 0 && (
-                <div className="empty-state">Chưa có danh mục nào</div>
-            )}
+            <Modal
+                title={editCategory ? 'Chỉnh sửa danh mục' : 'Thêm danh mục mới'}
+                open={showModal}
+                onCancel={handleCloseModal}
+                footer={null}
+                destroyOnClose
+            >
+                <Form
+                    form={form}
+                    layout="vertical"
+                    onFinish={handleSubmit}
+                >
+                    <Form.Item
+                        name="name"
+                        label="Tên danh mục"
+                        rules={[{ required: true, message: 'Vui lòng nhập tên danh mục!' }]}
+                    >
+                        <Input onChange={handleNameChange} placeholder="Nhập tên danh mục" />
+                    </Form.Item>
 
-            {showModal && (
-                <div className="modal-overlay" onClick={() => setShowModal(false)}>
-                    <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-                        <h2>{editCategory ? 'Chỉnh sửa danh mục' : 'Thêm danh mục mới'}</h2>
-                        <form onSubmit={handleSubmit}>
-                            <div className="form-group">
-                                <label>Tên danh mục *</label>
-                                <input
-                                    type="text"
-                                    value={formData.name}
-                                    onChange={(e) => handleNameChange(e.target.value)}
-                                    required
-                                />
+                    <Form.Item
+                        name="slug"
+                        label={
+                            <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%', alignItems: 'center' }}>
+                                <span>Slug</span>
+                                <Button
+                                    type="link"
+                                    size="small"
+                                    icon={<ReloadOutlined />}
+                                    onClick={handleRegenerateSlug}
+                                    style={{ padding: 0 }}
+                                >
+                                    Tạo lại
+                                </Button>
                             </div>
+                        }
+                        rules={[{ required: true, message: 'Vui lòng nhập slug!' }]}
+                    >
+                        <Input placeholder="ten-danh-muc" />
+                    </Form.Item>
 
-                            <div className="form-group">
-                                <label style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                    <span>Slug *</span>
-                                    <button
-                                        type="button"
-                                        onClick={handleRegenerateSlug}
-                                        style={{
-                                            fontSize: '0.75rem', background: 'none', border: '1px solid #ccc',
-                                            borderRadius: 4, padding: '2px 8px', cursor: 'pointer', color: '#555'
-                                        }}
-                                    >
-                                        🔄 Tạo lại từ tên
-                                    </button>
-                                </label>
-                                <input
-                                    type="text"
-                                    value={formData.slug}
-                                    onChange={(e) => setFormData({ ...formData, slug: e.target.value })}
-                                    required
-                                    placeholder="ten-danh-muc"
-                                />
-                            </div>
+                    <Form.Item
+                        name="description"
+                        label="Mô tả"
+                    >
+                        <Input.TextArea rows={3} placeholder="Mô tả ngắn gọn về danh mục..." />
+                    </Form.Item>
 
-                            <div className="form-group">
-                                <label>Mô tả</label>
-                                <textarea
-                                    value={formData.description}
-                                    onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                                    rows="3"
-                                />
-                            </div>
+                    <Form.Item
+                        name="image"
+                        label="URL Hình ảnh"
+                    >
+                        <Input placeholder="https://..." />
+                    </Form.Item>
 
-                            <div className="form-group">
-                                <label>URL Hình ảnh</label>
-                                <input
-                                    type="text"
-                                    value={formData.image}
-                                    onChange={(e) => setFormData({ ...formData, image: e.target.value })}
-                                />
-                            </div>
-
-                            <div className="modal-actions">
-                                <button type="button" onClick={() => setShowModal(false)} className="btn-cancel">
-                                    Hủy
-                                </button>
-                                <button type="submit" className="btn-submit">
-                                    {editCategory ? 'Cập nhật' : 'Tạo mới'}
-                                </button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-            )}
+                    <Form.Item style={{ marginBottom: 0, textAlign: 'right' }}>
+                        <Space>
+                            <Button onClick={handleCloseModal}>Hủy</Button>
+                            <Button type="primary" htmlType="submit" loading={submitLoading}>
+                                {editCategory ? 'Cập nhật' : 'Tạo mới'}
+                            </Button>
+                        </Space>
+                    </Form.Item>
+                </Form>
+            </Modal>
         </div>
     );
 };

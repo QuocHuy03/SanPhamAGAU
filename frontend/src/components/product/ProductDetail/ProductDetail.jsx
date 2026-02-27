@@ -43,7 +43,7 @@ const ProductDetail = ({ product }) => {
         {/* Product Info */}
         <div className="product-info-section">
           <h1 className="product-title">{product.name}</h1>
-          
+
           <div className="product-meta">
             <div className="product-rating">
               <div className="stars">
@@ -84,8 +84,8 @@ const ProductDetail = ({ product }) => {
           {product.sizes && product.sizes.length > 0 && (
             <div className="selection-section">
               <h3>Kích thước:</h3>
-              <SizeSelector 
-                sizes={product.sizes} 
+              <SizeSelector
+                sizes={product.sizes}
                 selectedSize={selectedSize}
                 onSelectSize={setSelectedSize}
               />
@@ -96,8 +96,8 @@ const ProductDetail = ({ product }) => {
           {product.colors && product.colors.length > 0 && (
             <div className="selection-section">
               <h3>Màu sắc:</h3>
-              <ColorSelector 
-                colors={product.colors} 
+              <ColorSelector
+                colors={product.colors}
                 selectedColor={selectedColor}
                 onSelectColor={setSelectedColor}
               />
@@ -108,7 +108,7 @@ const ProductDetail = ({ product }) => {
           <div className="quantity-section">
             <h3>Số lượng:</h3>
             <div className="quantity-control">
-              <button 
+              <button
                 className="quantity-btn"
                 onClick={() => setQuantity(Math.max(1, quantity - 1))}
               >
@@ -121,7 +121,7 @@ const ProductDetail = ({ product }) => {
                 className="quantity-input"
                 min="1"
               />
-              <button 
+              <button
                 className="quantity-btn"
                 onClick={() => setQuantity(quantity + 1)}
               >
@@ -149,13 +149,13 @@ const ProductDetail = ({ product }) => {
           {/* Additional Info */}
           <div className="additional-info">
             <div className="info-item">
-              <strong>Danh mục:</strong> {product.category}
+              <strong>Danh mục:</strong> {typeof product.category === 'object' ? product.category?.name : product.category}
             </div>
             <div className="info-item">
               <strong>Thương hiệu:</strong> {product.brand}
             </div>
             <div className="info-item">
-              <strong>Tình trạng:</strong> 
+              <strong>Tình trạng:</strong>
               <span className={`status ${product.inStock ? 'in-stock' : 'out-stock'}`}>
                 {product.inStock ? 'Còn hàng' : 'Hết hàng'}
               </span>

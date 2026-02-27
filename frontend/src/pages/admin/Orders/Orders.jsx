@@ -1,17 +1,27 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import { Table, Tag, Input, Select, DatePicker, Row, Col, Typography, Space, Button, Card, message, Statistic } from 'antd';
+import {
+  SearchOutlined,
+  EyeOutlined,
+  CloseCircleOutlined,
+  CarOutlined,
+  CheckCircleOutlined
+} from '@ant-design/icons';
 import { adminService } from '../../../services/adminService';
-import LoadingSpinner from '../../../components/common/LoadingSpinner/LoadingSpinner';
 import { formatCurrency, formatDate } from '../../../utils/helpers';
-import './Orders.css';
+// import './Orders.css'; // Removed old CSS
+
+const { Title, Text } = Typography;
+const { Option } = Select;
 
 const ORDER_STATUS_MAP = {
-  pending: { text: 'Chờ xác nhận', color: 'pending' },
-  confirmed: { text: 'Đã xác nhận', color: 'confirmed' },
-  processing: { text: 'Đang xử lý', color: 'processing' },
-  shipped: { text: 'Đang giao', color: 'shipped' },
-  delivered: { text: 'Đã giao', color: 'delivered' },
-  cancelled: { text: 'Đã hủy', color: 'cancelled' }
+  pending: { text: 'Chờ xác nhận', color: 'orange' },
+  confirmed: { text: 'Đã xác nhận', color: 'cyan' },
+  processing: { text: 'Đang xử lý', color: 'blue' },
+  shipped: { text: 'Đang giao', color: 'purple' },
+  delivered: { text: 'Đã giao', color: 'green' },
+  cancelled: { text: 'Đã hủy', color: 'red' }
 };
 
 const AdminOrders = () => {
@@ -19,12 +29,13 @@ const AdminOrders = () => {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedStatus, setSelectedStatus] = useState('');
-  const [selectedDate, setSelectedDate] = useState('');
+  const [selectedDate, setSelectedDate] = useState(null);
   const [pagination, setPagination] = useState({
     current: 1,
     pageSize: 10,
     total: 0
   });
+  const navigate = useNavigate();
 
   useEffect(() => {
     fetchOrders();
@@ -37,7 +48,7 @@ const AdminOrders = () => {
         page: pagination.current,
         limit: pagination.pageSize,
         status: selectedStatus,
-        date: selectedDate
+        date: selectedDate ? selectedDate.format('YYYY-MM-DD') : ''
       });
 
       // Backend trả về response.data.data.orders
@@ -49,6 +60,7 @@ const AdminOrders = () => {
       }));
     } catch (error) {
       console.error('Error fetching orders:', error);
+      message.error('Lỗi khi tải danh sách đơn hàng');
     } finally {
       setLoading(false);
     }
@@ -57,11 +69,20 @@ const AdminOrders = () => {
   const handleStatusChange = async (orderId, newStatus) => {
     try {
       await adminService.updateOrderStatus(orderId, newStatus);
+      message.success('Cập nhật trạng thái thành công');
       fetchOrders();
     } catch (error) {
       console.error('Error updating order status:', error);
-      alert('Lỗi khi cập nhật trạng thái');
+      message.error('Lỗi khi cập nhật trạng thái');
     }
+  };
+
+  const handleTableChange = (newPagination) => {
+    setPagination(prev => ({
+      ...prev,
+      current: newPagination.current,
+      pageSize: newPagination.pageSize
+    }));
   };
 
   const filteredOrders = orders.filter(order => {
@@ -71,192 +92,199 @@ const AdminOrders = () => {
       order.user?.email?.toLowerCase().includes(searchTerm.toLowerCase());
   });
 
-  if (loading) {
-    return <LoadingSpinner />;
-  }
+  const columns = [
+    {
+      title: 'Mã đơn',
+      dataIndex: 'orderNumber',
+      key: 'orderNumber',
+      render: (text, record) => (
+        <Button type="link" onClick={() => navigate(`/admin/orders/${record._id}`)} style={{ padding: 0 }}>
+          #{text || record._id?.slice(-6)}
+        </Button>
+      ),
+    },
+    {
+      title: 'Khách hàng',
+      key: 'customer',
+      render: (_, record) => (
+        <Space direction="vertical" size={0}>
+          <Text strong>{record.user?.name || 'N/A'}</Text>
+          <Text type="secondary" style={{ fontSize: 12 }}>{record.user?.email || ''}</Text>
+          <Text type="secondary" style={{ fontSize: 12 }}>{record.user?.phone || ''}</Text>
+        </Space>
+      ),
+    },
+    {
+      title: 'Ngày đặt',
+      dataIndex: 'createdAt',
+      key: 'createdAt',
+      render: (date) => formatDate(date),
+    },
+    {
+      title: 'Sản phẩm',
+      key: 'items',
+      render: (_, record) => `${record.items?.length || 0} sản phẩm`,
+    },
+    {
+      title: 'Tổng tiền',
+      dataIndex: 'total',
+      key: 'total',
+      render: (total) => <Text strong>{formatCurrency(total || 0)}</Text>,
+    },
+    {
+      title: 'Thanh toán',
+      dataIndex: 'paymentStatus',
+      key: 'paymentStatus',
+      render: (status) => (
+        <Tag color={status === 'paid' ? 'green' : 'orange'}>
+          {status === 'paid' ? 'Đã TT' : 'Chưa TT'}
+        </Tag>
+      ),
+    },
+    {
+      title: 'Trạng thái',
+      key: 'status',
+      render: (_, record) => (
+        <Select
+          value={record.status}
+          onChange={(value) => handleStatusChange(record._id, value)}
+          style={{ width: 130 }}
+          bordered={false}
+          className={`status-select-${record.status}`}
+          dropdownMatchSelectWidth={false}
+        >
+          {Object.entries(ORDER_STATUS_MAP).map(([key, status]) => (
+            <Option key={key} value={key}>
+              <Tag color={status.color} style={{ margin: 0 }}>{status.text}</Tag>
+            </Option>
+          ))}
+        </Select>
+      ),
+    },
+    {
+      title: 'Thao tác',
+      key: 'action',
+      render: (_, record) => (
+        <Space size="small">
+          <Button
+            type="text"
+            icon={<EyeOutlined />}
+            onClick={() => navigate(`/admin/orders/${record._id}`)}
+            title="Xem chi tiết"
+          />
+          {record.status === 'pending' && (
+            <Button
+              type="text"
+              danger
+              icon={<CloseCircleOutlined />}
+              onClick={() => handleStatusChange(record._id, 'cancelled')}
+              title="Hủy đơn"
+            />
+          )}
+          {record.status === 'confirmed' && (
+            <Button
+              type="text"
+              style={{ color: '#1677ff' }}
+              icon={<CarOutlined />}
+              onClick={() => handleStatusChange(record._id, 'shipped')}
+              title="Giao hàng"
+            />
+          )}
+          {record.status === 'shipped' && (
+            <Button
+              type="text"
+              style={{ color: '#52c41a' }}
+              icon={<CheckCircleOutlined />}
+              onClick={() => handleStatusChange(record._id, 'delivered')}
+              title="Hoàn thành"
+            />
+          )}
+        </Space>
+      ),
+    },
+  ];
 
   return (
-    <div className="admin-orders">
-      <div className="orders-header">
-        <h1>Quản lý đơn hàng</h1>
-        <div className="order-stats">
-          <div className="stat-item">
-            <span className="stat-label">Tổng đơn</span>
-            <span className="stat-value">{pagination.total}</span>
-          </div>
-          <div className="stat-item">
-            <span className="stat-label">Chờ xử lý</span>
-            <span className="stat-value pending">
-              {orders.filter(o => o.status === 'pending').length}
-            </span>
-          </div>
-          <div className="stat-item">
-            <span className="stat-label">Đang giao</span>
-            <span className="stat-value shipping">
-              {orders.filter(o => o.status === 'shipped').length}
-            </span>
-          </div>
-        </div>
+    <div>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
+        <Title level={2} style={{ margin: 0 }}>Quản lý đơn hàng</Title>
       </div>
 
-      {/* Filters */}
-      <div className="orders-filters">
-        <div className="search-box">
-          <span className="search-icon">🔍</span>
-          <input
-            type="text"
+      <Row gutter={[16, 16]} style={{ marginBottom: 24 }}>
+        <Col xs={24} sm={8}>
+          <Card size="small" bordered={false}>
+            <Statistic title="Tổng đơn" value={pagination.total} />
+          </Card>
+        </Col>
+        <Col xs={24} sm={8}>
+          <Card size="small" bordered={false}>
+            <Statistic
+              title="Chờ xử lý"
+              value={orders.filter(o => o.status === 'pending').length}
+              valueStyle={{ color: '#faad14' }}
+            />
+          </Card>
+        </Col>
+        <Col xs={24} sm={8}>
+          <Card size="small" bordered={false}>
+            <Statistic
+              title="Đang giao"
+              value={orders.filter(o => o.status === 'shipped').length}
+              valueStyle={{ color: '#722ed1' }}
+            />
+          </Card>
+        </Col>
+      </Row>
+
+      <Row gutter={[16, 16]} style={{ marginBottom: 24 }}>
+        <Col xs={24} sm={12} md={8}>
+          <Input
             placeholder="Tìm kiếm theo mã đơn, tên khách hàng..."
+            prefix={<SearchOutlined />}
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
+            allowClear
           />
-        </div>
-
-        <div className="filter-group">
-          <div className="filter-box">
-            <span className="filter-icon">🌪️</span>
-            <select
-              value={selectedStatus}
-              onChange={(e) => setSelectedStatus(e.target.value)}
-            >
-              <option value="">Tất cả trạng thái</option>
-              {Object.entries(ORDER_STATUS_MAP).map(([key, status]) => (
-                <option key={key} value={key}>{status.text}</option>
-              ))}
-            </select>
-          </div>
-
-          <div className="filter-box">
-            <input
-              type="date"
-              value={selectedDate}
-              onChange={(e) => setSelectedDate(e.target.value)}
-            />
-          </div>
-        </div>
-      </div>
-
-      {/* Orders Table */}
-      <div className="orders-table-container">
-        <table className="orders-table">
-          <thead>
-            <tr>
-              <th>Mã đơn</th>
-              <th>Khách hàng</th>
-              <th>Ngày đặt</th>
-              <th>Sản phẩm</th>
-              <th>Tổng tiền</th>
-              <th>Thanh toán</th>
-              <th>Trạng thái</th>
-              <th>Thao tác</th>
-            </tr>
-          </thead>
-          <tbody>
-            {filteredOrders.length === 0 ? (
-              <tr>
-                <td colSpan="8" style={{ textAlign: 'center', padding: '30px' }}>
-                  Không có đơn hàng nào
-                </td>
-              </tr>
-            ) : filteredOrders.map(order => (
-              <tr key={order._id}>
-                <td className="order-code">
-                  <Link to={`/admin/orders/${order._id}`}>
-                    #{order.orderNumber || order._id?.slice(-6)}
-                  </Link>
-                </td>
-                <td>
-                  <div className="customer-info">
-                    <strong>{order.user?.name || 'N/A'}</strong>
-                    <small>{order.user?.email || ''}</small>
-                    <small>{order.user?.phone || ''}</small>
-                  </div>
-                </td>
-                <td>{formatDate(order.createdAt)}</td>
-                <td>
-                  <div className="order-items-summary">
-                    <span>📦</span>
-                    <span>{order.items?.length || 0} sản phẩm</span>
-                  </div>
-                </td>
-                <td className="total-price">
-                  {formatCurrency(order.total || 0)}
-                </td>
-                <td>
-                  <span className={`payment-status ${order.paymentStatus}`}>
-                    {order.paymentStatus === 'paid' ? '✅ Đã thanh toán' : '⏳ Chưa thanh toán'}
-                  </span>
-                </td>
-                <td>
-                  <select
-                    className={`status-select ${order.status}`}
-                    value={order.status}
-                    onChange={(e) => handleStatusChange(order._id, e.target.value)}
-                  >
-                    {Object.entries(ORDER_STATUS_MAP).map(([key, status]) => (
-                      <option key={key} value={key}>{status.text}</option>
-                    ))}
-                  </select>
-                </td>
-                <td className="actions-cell">
-                  <Link
-                    to={`/admin/orders/${order._id}`}
-                    className="btn-icon view"
-                    title="Xem chi tiết"
-                  >
-                    👁️
-                  </Link>
-                  {order.status === 'pending' && (
-                    <button
-                      className="btn-icon cancel"
-                      onClick={() => handleStatusChange(order._id, 'cancelled')}
-                      title="Hủy đơn"
-                    >
-                      ❌
-                    </button>
-                  )}
-                  {order.status === 'confirmed' && (
-                    <button
-                      className="btn-icon ship"
-                      onClick={() => handleStatusChange(order._id, 'shipped')}
-                      title="Giao hàng"
-                    >
-                      🚚
-                    </button>
-                  )}
-                  {order.status === 'shipped' && (
-                    <button
-                      className="btn-icon deliver"
-                      onClick={() => handleStatusChange(order._id, 'delivered')}
-                      title="Hoàn thành"
-                    >
-                      ✅
-                    </button>
-                  )}
-                </td>
-              </tr>
+        </Col>
+        <Col xs={24} sm={6} md={8}>
+          <Select
+            style={{ width: '100%' }}
+            placeholder="Tất cả trạng thái"
+            value={selectedStatus || undefined}
+            onChange={setSelectedStatus}
+            allowClear
+          >
+            {Object.entries(ORDER_STATUS_MAP).map(([key, status]) => (
+              <Option key={key} value={key}>{status.text}</Option>
             ))}
-          </tbody>
-        </table>
-      </div>
+          </Select>
+        </Col>
+        <Col xs={24} sm={6} md={8}>
+          <DatePicker
+            style={{ width: '100%' }}
+            value={selectedDate}
+            onChange={setSelectedDate}
+            placeholder="Chọn ngày đặt"
+            format="DD/MM/YYYY"
+          />
+        </Col>
+      </Row>
 
-      {/* Pagination */}
-      {pagination.total > pagination.pageSize && (
-        <div className="pagination">
-          <button
-            onClick={() => setPagination(prev => ({ ...prev, current: prev.current - 1 }))}
-            disabled={pagination.current === 1}
-          >
-            Trước
-          </button>
-          <span>Trang {pagination.current} / {Math.ceil(pagination.total / pagination.pageSize)}</span>
-          <button
-            onClick={() => setPagination(prev => ({ ...prev, current: prev.current + 1 }))}
-            disabled={pagination.current === Math.ceil(pagination.total / pagination.pageSize)}
-          >
-            Sau
-          </button>
-        </div>
-      )}
+      <Table
+        columns={columns}
+        dataSource={filteredOrders}
+        rowKey="_id"
+        loading={loading}
+        size="middle"
+        pagination={{
+          current: pagination.current,
+          pageSize: pagination.pageSize,
+          total: pagination.total,
+          showSizeChanger: true,
+          showTotal: (total) => `Tổng ${total} đơn hàng`
+        }}
+        onChange={handleTableChange}
+      />
     </div>
   );
 };

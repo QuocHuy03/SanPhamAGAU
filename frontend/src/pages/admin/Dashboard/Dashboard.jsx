@@ -1,31 +1,35 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import { Row, Col, Card, Statistic, Table, Typography, Tag, Space, Button } from 'antd';
 import {
-  FaShoppingBag,
-  FaUsers,
-  FaBoxes,
-  FaMoneyBillWave,
-  FaArrowUp,
-  FaArrowDown,
-} from 'react-icons/fa';
+  ShoppingOutlined,
+  TeamOutlined,
+  AppstoreOutlined,
+  AccountBookOutlined,
+  ArrowUpOutlined,
+  ArrowDownOutlined,
+  EyeOutlined
+} from '@ant-design/icons';
 import { adminService } from '../../../services/adminService';
-import LoadingSpinner from '../../../components/common/LoadingSpinner/LoadingSpinner';
 import { formatCurrency, formatDate } from '../../../utils/helpers';
-import './Dashboard.css';
+// import './Dashboard.css'; // Removed old CSS
 
-const STATUS_LABELS = {
-  pending: 'Chờ xác nhận',
-  confirmed: 'Đã xác nhận',
-  processing: 'Đang xử lý',
-  shipped: 'Đang giao',
-  delivered: 'Đã giao',
-  cancelled: 'Đã hủy'
+const { Title } = Typography;
+
+const STATUS_CONFIG = {
+  pending: { label: 'Chờ xác nhận', color: 'orange' },
+  confirmed: { label: 'Đã xác nhận', color: 'cyan' },
+  processing: { label: 'Đang xử lý', color: 'blue' },
+  shipped: { label: 'Đang giao', color: 'purple' },
+  delivered: { label: 'Đã giao', color: 'green' },
+  cancelled: { label: 'Đã hủy', color: 'red' }
 };
 
 const AdminDashboard = () => {
   const [stats, setStats] = useState(null);
   const [recentOrders, setRecentOrders] = useState([]);
   const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
 
   useEffect(() => {
     fetchDashboardData();
@@ -53,120 +57,137 @@ const AdminDashboard = () => {
     }
   };
 
-  if (loading) {
-    return <LoadingSpinner />;
-  }
+  const columns = [
+    {
+      title: 'Mã đơn',
+      dataIndex: 'orderNumber',
+      key: 'orderNumber',
+      render: (text, record) => `#${text || record._id?.slice(-6)}`,
+    },
+    {
+      title: 'Khách hàng',
+      dataIndex: ['user', 'name'],
+      key: 'customer',
+      render: (name) => name || 'Khách vãng lai',
+    },
+    {
+      title: 'Ngày đặt',
+      dataIndex: 'createdAt',
+      key: 'date',
+      render: (date) => formatDate(date),
+    },
+    {
+      title: 'Tổng tiền',
+      dataIndex: 'total',
+      key: 'total',
+      render: (total) => <Typography.Text strong>{formatCurrency(total || 0)}</Typography.Text>,
+    },
+    {
+      title: 'Trạng thái',
+      dataIndex: 'status',
+      key: 'status',
+      render: (status) => {
+        const config = STATUS_CONFIG[status] || { label: status, color: 'default' };
+        return <Tag color={config.color}>{config.label}</Tag>;
+      },
+    },
+    {
+      title: 'Thao tác',
+      key: 'action',
+      render: (_, record) => (
+        <Button
+          type="text"
+          icon={<EyeOutlined />}
+          style={{ color: '#1677ff' }}
+          onClick={() => navigate(`/admin/orders/${record._id}`)}
+        >
+          Xem
+        </Button>
+      ),
+    },
+  ];
 
   return (
-    <div className="admin-dashboard">
-      <div className="dashboard-header">
-        <h1 className="dashboard-title">Dashboard</h1>
+    <div>
+      <div style={{ marginBottom: 24 }}>
+        <Title level={2} style={{ margin: 0 }}>Dashboard</Title>
       </div>
 
-      {/* Stats Cards */}
-      <div className="stats-grid">
-        <div className="stat-card">
-          <div className="stat-icon revenue">
-            <FaMoneyBillWave />
-          </div>
-          <div className="stat-info">
-            <h3>Doanh thu</h3>
-            <p className="stat-value">{formatCurrency(stats?.totalRevenue || 0)}</p>
-            <span className="stat-change positive">
-              <FaArrowUp /> Tháng này: {formatCurrency(stats?.monthlyRevenue || 0)}
-            </span>
-          </div>
-        </div>
+      <Row gutter={[24, 24]}>
+        <Col xs={24} sm={12} lg={6}>
+          <Card bordered={false} loading={loading}>
+            <Statistic
+              title="Doanh thu tổng"
+              value={stats?.totalRevenue || 0}
+              precision={0}
+              valueStyle={{ color: '#3f8600' }}
+              prefix={<AccountBookOutlined />}
+              formatter={(value) => formatCurrency(value)}
+            />
+            <div style={{ marginTop: 8, fontSize: 12, color: 'rgba(0,0,0,0.45)' }}>
+              Tháng này: {formatCurrency(stats?.monthlyRevenue || 0)}
+            </div>
+          </Card>
+        </Col>
 
-        <div className="stat-card">
-          <div className="stat-icon orders">
-            <FaShoppingBag />
-          </div>
-          <div className="stat-info">
-            <h3>Đơn hàng</h3>
-            <p className="stat-value">{stats?.totalOrders || 0}</p>
-            <span className="stat-change positive">
-              <FaArrowUp /> Hôm nay: +{stats?.newOrdersToday || 0}
-            </span>
-          </div>
-        </div>
+        <Col xs={24} sm={12} lg={6}>
+          <Card bordered={false} loading={loading}>
+            <Statistic
+              title="Đơn hàng"
+              value={stats?.totalOrders || 0}
+              prefix={<ShoppingOutlined />}
+              valueStyle={{ color: '#1677ff' }}
+            />
+            <div style={{ marginTop: 8, fontSize: 12, color: 'rgba(0,0,0,0.45)' }}>
+              <ArrowUpOutlined style={{ color: '#52c41a' }} /> Hôm nay: +{stats?.newOrdersToday || 0}
+            </div>
+          </Card>
+        </Col>
 
-        <div className="stat-card">
-          <div className="stat-icon products">
-            <FaBoxes />
-          </div>
-          <div className="stat-info">
-            <h3>Sản phẩm</h3>
-            <p className="stat-value">{stats?.totalProducts || 0}</p>
-            <span className="stat-change">
-              <FaArrowDown /> Danh mục: {stats?.totalCategories || 0}
-            </span>
-          </div>
-        </div>
+        <Col xs={24} sm={12} lg={6}>
+          <Card bordered={false} loading={loading}>
+            <Statistic
+              title="Sản phẩm"
+              value={stats?.totalProducts || 0}
+              prefix={<AppstoreOutlined />}
+              valueStyle={{ color: '#722ed1' }}
+            />
+            <div style={{ marginTop: 8, fontSize: 12, color: 'rgba(0,0,0,0.45)' }}>
+              Danh mục: {stats?.totalCategories || 0}
+            </div>
+          </Card>
+        </Col>
 
-        <div className="stat-card">
-          <div className="stat-icon users">
-            <FaUsers />
-          </div>
-          <div className="stat-info">
-            <h3>Người dùng</h3>
-            <p className="stat-value">{stats?.totalUsers || 0}</p>
-            <span className="stat-change positive">
-              <FaArrowUp /> Hôm nay: +{stats?.newUsersToday || 0}
-            </span>
-          </div>
-        </div>
-      </div>
+        <Col xs={24} sm={12} lg={6}>
+          <Card bordered={false} loading={loading}>
+            <Statistic
+              title="Người dùng"
+              value={stats?.totalUsers || 0}
+              prefix={<TeamOutlined />}
+              valueStyle={{ color: '#faad14' }}
+            />
+            <div style={{ marginTop: 8, fontSize: 12, color: 'rgba(0,0,0,0.45)' }}>
+              <ArrowUpOutlined style={{ color: '#52c41a' }} /> Hôm nay: +{stats?.newUsersToday || 0}
+            </div>
+          </Card>
+        </Col>
+      </Row>
 
-      {/* Recent Orders */}
-      <div className="recent-orders">
-        <div className="section-header">
-          <h2>Đơn hàng gần đây</h2>
-          <Link to="/admin/orders" className="view-all">
-            Xem tất cả
-          </Link>
-        </div>
-
-        <div className="orders-table-container">
-          <table className="orders-table">
-            <thead>
-              <tr>
-                <th>Mã đơn</th>
-                <th>Khách hàng</th>
-                <th>Ngày đặt</th>
-                <th>Tổng tiền</th>
-                <th>Trạng thái</th>
-                <th>Thao tác</th>
-              </tr>
-            </thead>
-            <tbody>
-              {recentOrders.length === 0 ? (
-                <tr>
-                  <td colSpan="6" style={{ textAlign: 'center', padding: '20px' }}>
-                    Chưa có đơn hàng nào
-                  </td>
-                </tr>
-              ) : recentOrders.map(order => (
-                <tr key={order._id}>
-                  <td>#{order.orderNumber || order._id?.slice(-6)}</td>
-                  <td>{order.user?.name || 'N/A'}</td>
-                  <td>{formatDate(order.createdAt)}</td>
-                  <td>{formatCurrency(order.total || 0)}</td>
-                  <td>
-                    <span className={`status-badge ${order.status}`}>
-                      {STATUS_LABELS[order.status] || order.status}
-                    </span>
-                  </td>
-                  <td>
-                    <Link to={`/admin/orders/${order._id}`} className="view-btn">
-                      Xem
-                    </Link>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+      <div style={{ marginTop: 24 }}>
+        <Card
+          bordered={false}
+          title="Đơn hàng gần đây"
+          extra={<Link to="/admin/orders">Xem tất cả</Link>}
+          bodyStyle={{ padding: 0 }}
+        >
+          <Table
+            columns={columns}
+            dataSource={recentOrders}
+            rowKey="_id"
+            pagination={false}
+            loading={loading}
+          />
+        </Card>
       </div>
     </div>
   );

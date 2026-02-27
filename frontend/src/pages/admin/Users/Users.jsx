@@ -1,12 +1,24 @@
 import React, { useState, useEffect } from 'react';
+import { Table, Input, Button, Tag, Select, Space, Typography, Popconfirm, message, Tooltip } from 'antd';
+import {
+    SearchOutlined,
+    DeleteOutlined,
+    UnlockOutlined,
+    LockOutlined,
+    UserOutlined,
+    SafetyCertificateOutlined
+} from '@ant-design/icons';
 import adminService from '../../../services/adminService';
-import './Users.css';
+import { formatDate } from '../../../utils/helpers';
+// import './Users.css'; // Removed old CSS
+
+const { Title, Text } = Typography;
+const { Option } = Select;
 
 const Users = () => {
     const [users, setUsers] = useState([]);
     const [loading, setLoading] = useState(true);
     const [search, setSearch] = useState('');
-    const [editUser, setEditUser] = useState(null);
 
     useEffect(() => {
         fetchUsers();
@@ -19,7 +31,7 @@ const Users = () => {
             setUsers(data.users || []);
         } catch (error) {
             console.error('Error fetching users:', error);
-            alert('Lỗi khi tải danh sách người dùng');
+            message.error('Lỗi khi tải danh sách người dùng');
         } finally {
             setLoading(false);
         }
@@ -28,117 +40,156 @@ const Users = () => {
     const handleUpdateRole = async (userId, newRole) => {
         try {
             await adminService.updateUser(userId, { role: newRole });
-            alert('Cập nhật role thành công!');
+            message.success('Cập nhật quyền thành công!');
             fetchUsers();
         } catch (error) {
-            alert('Lỗi khi cập nhật role');
+            message.error('Lỗi khi cập nhật quyền');
         }
     };
 
     const handleUpdateStatus = async (userId, isActive) => {
         try {
             await adminService.updateUser(userId, { isActive });
-            alert(`${isActive ? 'Kích hoạt' : 'Khóa'} tài khoản thành công!`);
+            message.success(`${isActive ? 'Kích hoạt' : 'Khóa'} tài khoản thành công!`);
             fetchUsers();
         } catch (error) {
-            alert('Lỗi khi cập nhật trạng thái');
+            message.error('Lỗi khi cập nhật trạng thái');
         }
     };
 
     const handleDelete = async (userId) => {
-        if (!window.confirm('Bạn có chắc muốn xóa người dùng này?')) return;
-
         try {
             await adminService.deleteUser(userId);
-            alert('Xóa người dùng thành công!');
+            message.success('Xóa người dùng thành công!');
             fetchUsers();
         } catch (error) {
-            alert(error.response?.data?.message || 'Lỗi khi xóa người dùng');
+            message.error(error.response?.data?.message || 'Lỗi khi xóa người dùng');
         }
     };
 
-    if (loading) return <div className="loading">Đang tải...</div>;
+    const columns = [
+        {
+            title: 'ID',
+            dataIndex: '_id',
+            key: 'id',
+            render: (text) => <Text type="secondary">#{text.slice(-6)}</Text>,
+            width: 100,
+        },
+        {
+            title: 'Người dùng',
+            key: 'user',
+            render: (_, record) => (
+                <Space direction="vertical" size={0}>
+                    <Text strong>{record.name}</Text>
+                    <Text type="secondary" style={{ fontSize: 12 }}>{record.email}</Text>
+                    {record.phone && <Text type="secondary" style={{ fontSize: 12 }}>{record.phone}</Text>}
+                </Space>
+            ),
+        },
+        {
+            title: 'Quyền',
+            dataIndex: 'role',
+            key: 'role',
+            render: (role, record) => (
+                <Select
+                    value={role}
+                    onChange={(value) => handleUpdateRole(record._id, value)}
+                    style={{ width: 110 }}
+                    size="small"
+                    bordered={false}
+                >
+                    <Option value="user">
+                        <Tag icon={<UserOutlined />} color="default">User</Tag>
+                    </Option>
+                    <Option value="admin">
+                        <Tag icon={<SafetyCertificateOutlined />} color="volcano">Admin</Tag>
+                    </Option>
+                </Select>
+            ),
+            width: 150,
+        },
+        {
+            title: 'Trạng thái',
+            dataIndex: 'isActive',
+            key: 'isActive',
+            render: (isActive) => (
+                <Tag color={isActive ? 'success' : 'error'}>
+                    {isActive ? 'Hoạt động' : 'Đã khóa'}
+                </Tag>
+            ),
+            width: 120,
+        },
+        {
+            title: 'Ngày tạo',
+            dataIndex: 'createdAt',
+            key: 'createdAt',
+            render: (date) => formatDate(date),
+            width: 150,
+        },
+        {
+            title: 'Thao tác',
+            key: 'action',
+            render: (_, record) => (
+                <Space size="middle">
+                    <Tooltip title={record.isActive ? 'Khóa tài khoản' : 'Kích hoạt'}>
+                        <Button
+                            type="text"
+                            icon={record.isActive ? <LockOutlined /> : <UnlockOutlined />}
+                            onClick={() => handleUpdateStatus(record._id, !record.isActive)}
+                            style={{ color: record.isActive ? '#faad14' : '#52c41a' }}
+                        />
+                    </Tooltip>
+                    <Popconfirm
+                        title="Xóa người dùng"
+                        description="Bạn có chắc chắn muốn xóa người dùng này? Hành động này không thể hoàn tác."
+                        onConfirm={() => handleDelete(record._id)}
+                        okText="Xóa"
+                        cancelText="Hủy"
+                        okButtonProps={{ danger: true }}
+                    >
+                        <Tooltip title="Xóa tài khoản">
+                            <Button type="text" danger icon={<DeleteOutlined />} />
+                        </Tooltip>
+                    </Popconfirm>
+                </Space>
+            ),
+            width: 120,
+        },
+    ];
 
     return (
-        <div className="admin-users">
-            <div className="page-header">
-                <h1>Quản lý người dùng</h1>
+        <div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
+                <Title level={2} style={{ margin: 0 }}>Quản lý người dùng</Title>
             </div>
 
-            <div className="users-filters">
-                <input
-                    type="text"
+            <div style={{ marginBottom: 24, display: 'flex', gap: 16 }}>
+                <Input
                     placeholder="Tìm kiếm theo tên, email..."
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
-                    onKeyUp={(e) => e.key === 'Enter' && fetchUsers()}
-                    className="search-input"
+                    onPressEnter={fetchUsers}
+                    prefix={<SearchOutlined />}
+                    style={{ maxWidth: 400 }}
+                    allowClear
                 />
-                <button onClick={fetchUsers} className="btn-search">🔍 Tìm kiếm</button>
+                <Button type="primary" onClick={fetchUsers} icon={<SearchOutlined />}>
+                    Tìm kiếm
+                </Button>
             </div>
 
-            <div className="users-table-container">
-                <table className="users-table">
-                    <thead>
-                        <tr>
-                            <th>ID</th>
-                            <th>Tên</th>
-                            <th>Email</th>
-                            <th>SĐT</th>
-                            <th>Role</th>
-                            <th>Trạng thái</th>
-                            <th>Ngày tạo</th>
-                            <th>Thao tác</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {users.map(user => (
-                            <tr key={user._id}>
-                                <td>#{user._id.slice(-6)}</td>
-                                <td>{user.name}</td>
-                                <td>{user.email}</td>
-                                <td>{user.phone || 'N/A'}</td>
-                                <td>
-                                    <select
-                                        value={user.role}
-                                        onChange={(e) => handleUpdateRole(user._id, e.target.value)}
-                                        className={`role-badge ${user.role}`}
-                                    >
-                                        <option value="user">User</option>
-                                        <option value="admin">Admin</option>
-                                    </select>
-                                </td>
-                                <td>
-                                    <span className={`status-badge ${user.isActive ? 'active' : 'inactive'}`}>
-                                        {user.isActive ? 'Hoạt động' : 'Khóa'}
-                                    </span>
-                                </td>
-                                <td>{new Date(user.createdAt).toLocaleDateString('vi-VN')}</td>
-                                <td className="actions">
-                                    <button
-                                        onClick={() => handleUpdateStatus(user._id, !user.isActive)}
-                                        className="btn-icon"
-                                        title={user.isActive ? 'Khóa' : 'Kích hoạt'}
-                                    >
-                                        {user.isActive ? '🔒' : '🔓'}
-                                    </button>
-                                    <button
-                                        onClick={() => handleDelete(user._id)}
-                                        className="btn-icon delete"
-                                        title="Xóa"
-                                    >
-                                        🗑️
-                                    </button>
-                                </td>
-                            </tr>
-                        ))}
-                    </tbody>
-                </table>
-            </div>
-
-            {users.length === 0 && (
-                <div className="empty-state">Không tìm thấy người dùng nào</div>
-            )}
+            <Table
+                columns={columns}
+                dataSource={users}
+                rowKey="_id"
+                loading={loading}
+                size="middle"
+                pagination={{
+                    defaultPageSize: 10,
+                    showSizeChanger: true,
+                    showTotal: (total) => `Tổng ${total} người dùng`
+                }}
+            />
         </div>
     );
 };
