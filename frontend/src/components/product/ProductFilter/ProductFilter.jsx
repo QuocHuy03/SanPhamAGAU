@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import PriceFilter from './PriceFilter';
 import CategoryFilter from './CategoryFilter';
 import SizeFilter from './SizeFilter';
@@ -6,6 +6,7 @@ import ColorFilter from './ColorFilter';
 import './ProductFilter.css';
 
 const ProductFilter = ({ onFilterChange }) => {
+  const { t } = useTranslation();
   const [filters, setFilters] = useState({
     priceRange: [0, 1000000],
     categories: [],
@@ -33,9 +34,9 @@ const ProductFilter = ({ onFilterChange }) => {
   return (
     <div className="product-filter">
       <div className="filter-header">
-        <h3>Bộ lọc</h3>
+        <h3>{t('shop.filter_title')}</h3>
         <button className="clear-filters" onClick={handleClearFilters}>
-          Xóa bộ lọc
+          {t('shop.clear_filters')}
         </button>
       </div>
 

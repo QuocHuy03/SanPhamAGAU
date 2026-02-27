@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 
 const LANGUAGES = {
     vi: {
@@ -95,16 +96,23 @@ const TRANSLATIONS = {
 const LanguageContext = createContext();
 
 export const LanguageProvider = ({ children }) => {
+    const { i18n, t: translate } = useTranslation();
     const stored = localStorage.getItem('language') || 'vi';
     const [language, setLanguage] = useState(stored);
     const langConfig = LANGUAGES[language] || LANGUAGES.vi;
 
     useEffect(() => {
         localStorage.setItem('language', language);
-    }, [language]);
+        if (i18n.language !== language) {
+            i18n.changeLanguage(language);
+        }
+    }, [language, i18n]);
 
     const changeLanguage = (lang) => {
-        if (LANGUAGES[lang]) setLanguage(lang);
+        if (LANGUAGES[lang]) {
+            setLanguage(lang);
+            i18n.changeLanguage(lang);
+        }
     };
 
     const formatPrice = (amountVND) => {
@@ -122,8 +130,14 @@ export const LanguageProvider = ({ children }) => {
         return `${currencySymbol}${converted.toLocaleString(locale)}`;
     };
 
+    // Backward compatible with old translation style or route to i18next
     const t = (key) => {
-        return TRANSLATIONS[language]?.[key] || TRANSLATIONS.vi[key] || key;
+        // Fallback to legacy dictionary if key doesn't contain a dot (old style)
+        if (!key.includes('.') && (TRANSLATIONS[language]?.[key] || TRANSLATIONS.vi[key])) {
+            return TRANSLATIONS[language]?.[key] || TRANSLATIONS.vi[key];
+        }
+        // Use standard i18n system otherwise
+        return translate(key);
     };
 
     return (
@@ -132,7 +146,7 @@ export const LanguageProvider = ({ children }) => {
             langConfig,
             changeLanguage,
             formatPrice,
-            t,
+            t, // Now backed by i18next
             languages: LANGUAGES
         }}>
             {children}

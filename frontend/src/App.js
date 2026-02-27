@@ -24,18 +24,10 @@ import UserProfile from './pages/User/Profile.jsx';
 import Contact from './pages/Contact/Contact.jsx';
 import About from './pages/About/About.jsx';
 import AdminLayout from './layouts/AdminLayout.jsx';
+import MainLayout from './layouts/MainLayout.jsx';
 
 
-// Main Layout for Shop Pages
-const MainLayout = ({ children }) => (
-  <>
-    <Header />
-    <main className="main-content">
-      {children}
-    </main>
-    <Footer />
-  </>
-);
+// Redundant inline MainLayout removed, now using src/layouts/MainLayout.jsx
 
 function App() {
   return (

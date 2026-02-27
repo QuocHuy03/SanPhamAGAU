@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
 import { clearCart } from '../../store/slices/cartSlice';
 import { orderService } from '../../services/orderService';
-import './CheckOut.css';
+// import './CheckOut.css';
 
 const CheckOut = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const { items } = useSelector((state) => state.cart);
@@ -107,190 +109,219 @@ const CheckOut = () => {
 
   if (!items || items.length === 0) {
     return (
-      <div className="checkout-container">
-        <h1>Thanh toán đơn hàng</h1>
-        <div className="empty-cart">
-          <h2>Giỏ hàng trống</h2>
-          <p>Bạn chưa có sản phẩm nào trong giỏ hàng.</p>
-          <button
-            onClick={() => navigate('/shop')}
-            className="btn-primary"
-          >
-            Mua sắm ngay
-          </button>
+      <div className="flex flex-col items-center justify-center py-20 px-4 text-center bg-white rounded-3xl shadow-sm border border-gray-100 mt-8">
+        <h1 className="text-3xl font-black text-gray-900 mb-4 tracking-tight">{t('checkout.title')}</h1>
+        <div className="w-24 h-24 bg-gray-50 rounded-full flex items-center justify-center mb-6 mt-4">
+          <svg className="w-12 h-12 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path></svg>
         </div>
+        <h2 className="text-xl font-bold text-gray-900 mb-2">{t('cart.empty_title')}</h2>
+        <p className="text-gray-500 mb-8 max-w-xs">{t('checkout.empty_desc')}</p>
+        <button
+          onClick={() => navigate('/shop')}
+          className="px-8 py-3 bg-indigo-600 text-white font-bold rounded-xl hover:bg-indigo-700 transition-all shadow-lg"
+        >
+          {t('orders.shop_now')}
+        </button>
       </div>
     );
   }
 
   return (
-    <div className="checkout-container">
-      <h1>Thanh toán đơn hàng</h1>
+    <div className="pb-12">
+      <h1 className="text-3xl font-black text-gray-900 mb-8 tracking-tight">{t('checkout.title')}</h1>
 
-      <div className="checkout-content">
-        <div className="checkout-form">
-          <h2>Thông tin giao hàng</h2>
-          <form onSubmit={handleSubmit}>
-            <div className="form-group">
-              <label>Họ và tên *</label>
-              <input
-                type="text"
-                name="fullName"
-                value={formData.fullName}
-                onChange={handleChange}
-                required
-                placeholder="Nhập họ và tên"
-              />
-            </div>
+      <div className="flex flex-col lg:flex-row gap-12">
+        {/* Left Side: Checkout Form */}
+        <div className="lg:w-2/3">
+          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8">
+            <h2 className="text-xl font-black text-gray-900 mb-8 uppercase tracking-tight flex items-center gap-3">
+              <span className="w-8 h-8 rounded-full bg-indigo-600 text-white flex items-center justify-center text-sm">1</span>
+              {t('checkout.delivery_info')}
+            </h2>
 
-            <div className="form-group">
-              <label>Email *</label>
-              <input
-                type="email"
-                name="email"
-                value={formData.email}
-                onChange={handleChange}
-                required
-                placeholder="example@email.com"
-              />
-            </div>
+            <form onSubmit={handleSubmit} className="space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-2">
+                  <label className="text-sm font-bold text-gray-700">{t('checkout.fullname')} *</label>
+                  <input
+                    type="text"
+                    name="fullName"
+                    value={formData.fullName}
+                    onChange={handleChange}
+                    required
+                    className="w-full h-12 px-4 rounded-xl border border-gray-200 focus:border-indigo-600 focus:ring-2 focus:ring-indigo-600/10 outline-none transition-all"
+                    placeholder={t('profile.fullname')}
+                  />
+                </div>
 
-            <div className="form-group">
-              <label>Số điện thoại *</label>
-              <input
-                type="tel"
-                name="phone"
-                value={formData.phone}
-                onChange={handleChange}
-                required
-                placeholder="0123456789"
-              />
-            </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-bold text-gray-700">{t('profile.email')} *</label>
+                  <input
+                    type="email"
+                    name="email"
+                    value={formData.email}
+                    onChange={handleChange}
+                    required
+                    className="w-full h-12 px-4 rounded-xl border border-gray-200 focus:border-indigo-600 focus:ring-2 focus:ring-indigo-600/10 outline-none transition-all"
+                    placeholder="example@email.com"
+                  />
+                </div>
+              </div>
 
-            <div className="form-group">
-              <label>Địa chỉ *</label>
-              <input
-                type="text"
-                name="address"
-                value={formData.address}
-                onChange={handleChange}
-                required
-                placeholder="Số nhà, tên đường, phường/xã"
-              />
-            </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-2">
+                  <label className="text-sm font-bold text-gray-700">{t('checkout.phone')} *</label>
+                  <input
+                    type="tel"
+                    name="phone"
+                    value={formData.phone}
+                    onChange={handleChange}
+                    required
+                    className="w-full h-12 px-4 rounded-xl border border-gray-200 focus:border-indigo-600 focus:ring-2 focus:ring-indigo-600/10 outline-none transition-all"
+                    placeholder="0123 456 789"
+                  />
+                </div>
 
-            <div className="form-row">
-              <div className="form-group">
-                <label>Thành phố *</label>
-                <select
-                  name="city"
-                  value={formData.city}
+                <div className="space-y-2">
+                  <label className="text-sm font-bold text-gray-700">{t('checkout.city')} *</label>
+                  <select
+                    name="city"
+                    value={formData.city}
+                    onChange={handleChange}
+                    required
+                    className="w-full h-12 px-4 rounded-xl border border-gray-200 focus:border-indigo-600 focus:ring-2 focus:ring-indigo-600/10 outline-none transition-all bg-white"
+                  >
+                    <option value="">{t('checkout.select_city')}</option>
+                    <option value="hcm">Hồ Chí Minh</option>
+                    <option value="hanoi">Hà Nội</option>
+                    <option value="danang">Đà Nẵng</option>
+                    <option value="haiphong">Hải Phòng</option>
+                    <option value="cantho">Cần Thơ</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-sm font-bold text-gray-700">{t('checkout.address')} *</label>
+                <input
+                  type="text"
+                  name="address"
+                  value={formData.address}
                   onChange={handleChange}
                   required
+                  className="w-full h-12 px-4 rounded-xl border border-gray-200 focus:border-indigo-600 focus:ring-2 focus:ring-indigo-600/10 outline-none transition-all"
+                  placeholder="Số nhà, tên đường, phường/xã"
+                />
+              </div>
+
+              <div className="pt-8 mt-8 border-t border-gray-100">
+                <h2 className="text-xl font-black text-gray-900 mb-8 uppercase tracking-tight flex items-center gap-3">
+                  <span className="w-8 h-8 rounded-full bg-indigo-600 text-white flex items-center justify-center text-sm">2</span>
+                  {t('checkout.payment_method')}
+                </h2>
+
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                  {[
+                    { id: 'cod', label: t('checkout.methods.cod'), icon: '💵' },
+                    { id: 'banking', label: t('checkout.methods.banking'), icon: '🏦' },
+                    { id: 'momo', label: t('checkout.methods.momo'), icon: '📱' }
+                  ].map((method) => (
+                    <label key={method.id} className={`cursor-pointer p-4 rounded-2xl border-2 flex flex-col items-center gap-2 transition-all ${formData.paymentMethod === method.id ? 'border-indigo-600 bg-indigo-50 shadow-md' : 'border-gray-100 hover:border-indigo-200'}`}>
+                      <input
+                        type="radio"
+                        name="paymentMethod"
+                        value={method.id}
+                        checked={formData.paymentMethod === method.id}
+                        onChange={handleChange}
+                        className="hidden"
+                      />
+                      <span className="text-2xl">{method.icon}</span>
+                      <span className="text-xs font-black text-center text-gray-900 uppercase tracking-tight">{method.label}</span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+
+              <div className="pt-8 space-y-2">
+                <label className="text-sm font-bold text-gray-700">{t('checkout.note')}</label>
+                <textarea
+                  name="note"
+                  value={formData.note}
+                  onChange={handleChange}
+                  rows="3"
+                  className="w-full p-4 rounded-xl border border-gray-200 focus:border-indigo-600 focus:ring-2 focus:ring-indigo-600/10 outline-none transition-all resize-none"
+                  placeholder="Ví dụ: Giao hàng giờ hành chính..."
+                />
+              </div>
+
+              <div className="pt-8">
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="w-full h-16 bg-indigo-600 text-white rounded-2xl font-black text-lg shadow-lg shadow-indigo-100 hover:bg-indigo-700 transition-all uppercase tracking-widest active:scale-95 disabled:opacity-50"
                 >
-                  <option value="">Chọn thành phố</option>
-                  <option value="hcm">Hồ Chí Minh</option>
-                  <option value="hanoi">Hà Nội</option>
-                  <option value="danang">Đà Nẵng</option>
-                  <option value="haiphong">Hải Phòng</option>
-                  <option value="cantho">Cần Thơ</option>
-                </select>
+                  {loading ? t('checkout.processing') : t('checkout.place_order')}
+                </button>
               </div>
-            </div>
-
-            <div className="form-group">
-              <label>Phương thức thanh toán *</label>
-              <div className="payment-methods">
-                <label className={`payment-option ${formData.paymentMethod === 'cod' ? 'selected' : ''}`}>
-                  <input
-                    type="radio"
-                    name="paymentMethod"
-                    value="cod"
-                    checked={formData.paymentMethod === 'cod'}
-                    onChange={handleChange}
-                  />
-                  <span>Trả tiền khi nhận hàng</span>
-                </label>
-                <label className={`payment-option ${formData.paymentMethod === 'banking' ? 'selected' : ''}`}>
-                  <input
-                    type="radio"
-                    name="paymentMethod"
-                    value="banking"
-                    checked={formData.paymentMethod === 'banking'}
-                    onChange={handleChange}
-                  />
-                  <span>Chuyển khoản ngân hàng</span>
-                </label>
-                <label className={`payment-option ${formData.paymentMethod === 'momo' ? 'selected' : ''}`}>
-                  <input
-                    type="radio"
-                    name="paymentMethod"
-                    value="momo"
-                    checked={formData.paymentMethod === 'momo'}
-                    onChange={handleChange}
-                  />
-                  <span>Ví MoMo</span>
-                </label>
-              </div>
-            </div>
-
-            <div className="form-group">
-              <label>Ghi chú</label>
-              <textarea
-                name="note"
-                value={formData.note}
-                onChange={handleChange}
-                rows="3"
-                placeholder="Ghi chú về đơn hàng, ví dụ: giao hàng giờ hành chính"
-              />
-            </div>
-
-            <button type="submit" className="checkout-btn" disabled={loading}>
-              {loading ? 'Đang đặt hàng...' : 'Đặt hàng'}
-            </button>
-          </form>
+            </form>
+          </div>
         </div>
 
-        <div className="order-summary">
-          <h2>Đơn hàng của bạn</h2>
+        {/* Right Side: Order Summary */}
+        <div className="lg:w-1/3">
+          <div className="bg-gray-900 rounded-3xl shadow-2xl p-8 text-white sticky top-28">
+            <h2 className="text-xl font-black mb-8 uppercase tracking-tight border-b border-white/10 pb-4">{t('checkout.order_summary')}</h2>
 
-          <div className="cart-items">
-            {items.map(item => (
-              <div key={item.id || item._id} className="cart-item">
-                <div className="cart-item-info">
-                  <span className="item-name">{item.name}</span>
-                  <div className="item-meta">
-                    {item.size && <span>Size: {item.size}</span>}
-                    {item.color && <span>Màu: {item.color?.name || item.color}</span>}
-                    <span className="item-quantity">x{item.quantity}</span>
+            <div className="space-y-6 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar mb-8">
+              {items.map(item => (
+                <div key={item.id || item._id} className="flex gap-4 group">
+                  <div className="w-16 h-20 bg-white/10 rounded-lg overflow-hidden flex-shrink-0">
+                    <img src={item.images?.[0]?.url || item.image} alt={item.name} className="w-full h-full object-cover" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <h4 className="text-sm font-bold line-clamp-2 mb-1">{item.name}</h4>
+                    <div className="flex flex-wrap gap-2 text-[10px] text-gray-400 font-bold uppercase tracking-wider">
+                      {item.size && <span>{t('product.size')}: {item.size}</span>}
+                      {item.color && <span>{t('product.color')}: {item.color?.name || item.color}</span>}
+                      <span className="text-indigo-400">x{item.quantity}</span>
+                    </div>
+                  </div>
+                  <div className="text-right flex-shrink-0">
+                    <span className="text-sm font-black whitespace-nowrap">{(item.price * item.quantity).toLocaleString()}đ</span>
                   </div>
                 </div>
-                <span className="item-price">
-                  {(item.price * item.quantity).toLocaleString()}đ
+              ))}
+            </div>
+
+            <div className="space-y-4 pt-8 border-t border-white/10">
+              <div className="flex justify-between text-gray-400 text-sm font-medium">
+                <span>{t('cart.subtotal')}</span>
+                <span>{calculateSubtotal().toLocaleString()}đ</span>
+              </div>
+              <div className="flex justify-between items-center text-sm font-medium">
+                <span className="text-gray-400">{t('cart.shipping')}</span>
+                <span className={shippingFee === 0 ? 'text-emerald-400 font-black' : ''}>
+                  {shippingFee === 0 ? t('cart.free').toUpperCase() : `${shippingFee.toLocaleString()}đ`}
                 </span>
               </div>
-            ))}
-          </div>
 
-          <div className="summary-details">
-            <div className="summary-row">
-              <span>Tạm tính</span>
-              <span>{calculateSubtotal().toLocaleString()}đ</span>
-            </div>
-            <div className="summary-row">
-              <span>Phí vận chuyển</span>
-              <span style={{ color: shippingFee === 0 ? 'var(--success)' : 'inherit' }}>
-                {shippingFee === 0 ? 'Miễn phí' : `${shippingFee.toLocaleString()}đ`}
-              </span>
-            </div>
-            {shippingFee === 0 && (
-              <div className="free-shipping-badge">
-                Miễn phí vận chuyển cho đơn hàng từ 500,000đ
+              <div className="pt-6 border-t border-white/10 flex justify-between items-end">
+                <span className="font-black text-lg">{t('cart.total').toUpperCase()}</span>
+                <div className="text-right">
+                  <span className="text-3xl font-black text-indigo-400 tracking-tight">
+                    {calculateTotal().toLocaleString()}đ
+                  </span>
+                </div>
               </div>
-            )}
-            <div className="summary-row total">
-              <span>Tổng cộng</span>
-              <span>{calculateTotal().toLocaleString()}đ</span>
+            </div>
+
+            <div className="mt-8 p-4 bg-white/5 rounded-2xl border border-white/10">
+              <div className="flex gap-3 items-center">
+                <span className="text-2xl">✨</span>
+                <p className="text-[10px] text-gray-300 leading-relaxed font-medium">
+                  {t('checkout.agree_terms')}
+                </p>
+              </div>
             </div>
           </div>
         </div>

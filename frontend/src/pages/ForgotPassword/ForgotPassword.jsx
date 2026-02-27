@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import axios from 'axios';
 import './ForgotPassword.css';
 
 const ForgotPassword = () => {
+    const { t } = useTranslation();
     const [email, setEmail] = useState('');
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
@@ -15,7 +17,7 @@ const ForgotPassword = () => {
         setError('');
 
         if (!email) {
-            setError('Vui lòng nhập email');
+            setError(t('auth.forgot_password_email_required', 'Vui lòng nhập email'));
             return;
         }
 
@@ -28,7 +30,7 @@ const ForgotPassword = () => {
                 navigate('/reset-password', { state: { email } });
             }, 2000);
         } catch (err) {
-            setError(err.response?.data?.message || 'Có lỗi xảy ra. Vui lòng thử lại.');
+            setError(err.response?.data?.message || t('auth.forgot_password_fail', 'Có lỗi xảy ra. Vui lòng thử lại.'));
         } finally {
             setLoading(false);
         }
@@ -39,9 +41,9 @@ const ForgotPassword = () => {
             <div className="container">
                 <div className="forgot-password-wrapper">
                     <div className="forgot-password-container">
-                        <h1 className="forgot-password-title">Quên mật khẩu</h1>
+                        <h1 className="forgot-password-title">{t('auth.forgot_password_title')}</h1>
                         <p className="forgot-password-subtitle">
-                            Nhập email của bạn để nhận mã xác nhận
+                            {t('auth.forgot_password_subtitle')}
                         </p>
 
                         {error && (
@@ -52,14 +54,14 @@ const ForgotPassword = () => {
 
                         {success && (
                             <div className="alert alert-success">
-                                Mã xác nhận đã được gửi! Đang chuyển hướng...
+                                {t('auth.forgot_password_success', 'Mã xác nhận đã được gửi! Đang chuyển hướng...')}
                             </div>
                         )}
 
                         <form onSubmit={handleSubmit} className="forgot-password-form">
                             <div className="form-group">
                                 <label htmlFor="email" className="form-label">
-                                    Email
+                                    {t('auth.email')}
                                 </label>
                                 <input
                                     type="email"
@@ -78,7 +80,7 @@ const ForgotPassword = () => {
                                 className="submit-btn"
                                 disabled={loading || success}
                             >
-                                {loading ? 'Đang gửi...' : success ? 'Đã gửi!' : 'Gửi mã xác nhận'}
+                                {loading ? t('auth.sending', 'Đang gửi...') : success ? t('auth.sent', 'Đã gửi!') : t('auth.send_code', 'Gửi mã xác nhận')}
                             </button>
 
                             <div className="back-to-login">
@@ -87,7 +89,7 @@ const ForgotPassword = () => {
                                     onClick={() => navigate('/login')}
                                     className="link-btn"
                                 >
-                                    ← Quay lại đăng nhập
+                                    ← {t('auth.back_to_login', 'Quay lại đăng nhập')}
                                 </button>
                             </div>
                         </form>

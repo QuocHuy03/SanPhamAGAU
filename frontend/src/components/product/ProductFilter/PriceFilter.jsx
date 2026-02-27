@@ -1,22 +1,24 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 
 const PriceFilter = ({ priceRange, onChange }) => {
+  const { t } = useTranslation();
   const handleChange = (e) => {
     const value = parseInt(e.target.value);
     const newRange = [...priceRange];
-    
+
     if (e.target.name === 'min') {
       newRange[0] = value;
     } else {
       newRange[1] = value;
     }
-    
+
     onChange(newRange);
   };
 
   return (
     <div className="filter-section">
-      <h4>Giá</h4>
+      <h4>{t('shop.price_range')}</h4>
       <div className="price-slider">
         <input
           type="range"

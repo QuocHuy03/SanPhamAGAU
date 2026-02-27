@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import axios from 'axios';
 import './ResetPassword.css';
 
 const ResetPassword = () => {
+    const { t } = useTranslation();
     const navigate = useNavigate();
     const location = useLocation();
     const emailFromState = location.state?.email || '';
@@ -33,25 +35,25 @@ const ResetPassword = () => {
         const newErrors = {};
 
         if (!formData.email) {
-            newErrors.email = 'Email là bắt buộc';
+            newErrors.email = t('auth.email_required', 'Email là bắt buộc');
         }
 
         if (!formData.code) {
-            newErrors.code = 'Mã xác nhận là bắt buộc';
+            newErrors.code = t('auth.reset_code_required', 'Mã xác nhận là bắt buộc');
         } else if (formData.code.length !== 6) {
-            newErrors.code = 'Mã xác nhận phải có 6 số';
+            newErrors.code = t('auth.reset_code_invalid', 'Mã xác nhận phải có 6 số');
         }
 
         if (!formData.newPassword) {
-            newErrors.newPassword = 'Mật khẩu mới là bắt buộc';
+            newErrors.newPassword = t('auth.new_password_required', 'Mật khẩu mới là bắt buộc');
         } else if (formData.newPassword.length < 6) {
-            newErrors.newPassword = 'Mật khẩu phải có ít nhất 6 ký tự';
+            newErrors.newPassword = t('auth.password_min_length', 'Mật khẩu phải có ít nhất 6 ký tự');
         }
 
         if (!formData.confirmPassword) {
-            newErrors.confirmPassword = 'Xác nhận mật khẩu là bắt buộc';
+            newErrors.confirmPassword = t('auth.confirm_password_required', 'Xác nhận mật khẩu là bắt buộc');
         } else if (formData.newPassword !== formData.confirmPassword) {
-            newErrors.confirmPassword = 'Mật khẩu không khớp';
+            newErrors.confirmPassword = t('auth.password_mismatch', 'Mật khẩu không khớp');
         }
 
         return newErrors;
@@ -80,7 +82,7 @@ const ResetPassword = () => {
             }, 2000);
         } catch (err) {
             setErrors({
-                submit: err.response?.data?.message || 'Có lỗi xảy ra. Vui lòng thử lại.'
+                submit: err.response?.data?.message || t('auth.forgot_password_fail', 'Có lỗi xảy ra. Vui lòng thử lại.')
             });
         } finally {
             setLoading(false);
@@ -92,9 +94,9 @@ const ResetPassword = () => {
             <div className="container">
                 <div className="reset-password-wrapper">
                     <div className="reset-password-container">
-                        <h1 className="reset-password-title">Đặt lại mật khẩu</h1>
+                        <h1 className="reset-password-title">{t('auth.reset_password_title', 'Đặt lại mật khẩu')}</h1>
                         <p className="reset-password-subtitle">
-                            Nhập mã xác nhận đã được gửi đến email của bạn
+                            {t('auth.reset_password_subtitle', 'Nhập mã xác nhận đã được gửi đến email của bạn')}
                         </p>
 
                         {errors.submit && (
@@ -105,14 +107,14 @@ const ResetPassword = () => {
 
                         {success && (
                             <div className="alert alert-success">
-                                Đặt lại mật khẩu thành công! Đang chuyển hướng...
+                                {t('auth.reset_password_success', 'Đặt lại mật khẩu thành công! Đang chuyển hướng...')}
                             </div>
                         )}
 
                         <form onSubmit={handleSubmit} className="reset-password-form">
                             <div className="form-group">
                                 <label htmlFor="email" className="form-label">
-                                    Email
+                                    {t('auth.email')}
                                 </label>
                                 <input
                                     type="email"
@@ -131,7 +133,7 @@ const ResetPassword = () => {
 
                             <div className="form-group">
                                 <label htmlFor="code" className="form-label">
-                                    Mã xác nhận (6 số)
+                                    {t('auth.reset_code_label', 'Mã xác nhận (6 số)')}
                                 </label>
                                 <input
                                     type="text"
@@ -151,7 +153,7 @@ const ResetPassword = () => {
 
                             <div className="form-group">
                                 <label htmlFor="newPassword" className="form-label">
-                                    Mật khẩu mới
+                                    {t('auth.new_password', 'Mật khẩu mới')}
                                 </label>
                                 <input
                                     type="password"
@@ -160,7 +162,7 @@ const ResetPassword = () => {
                                     value={formData.newPassword}
                                     onChange={handleChange}
                                     className={`form-input ${errors.newPassword ? 'error' : ''}`}
-                                    placeholder="Nhập mật khẩu mới"
+                                    placeholder={t('auth.new_password_placeholder', 'Nhập mật khẩu mới')}
                                     disabled={loading || success}
                                 />
                                 {errors.newPassword && (
@@ -170,7 +172,7 @@ const ResetPassword = () => {
 
                             <div className="form-group">
                                 <label htmlFor="confirmPassword" className="form-label">
-                                    Xác nhận mật khẩu mới
+                                    {t('auth.confirm_password_new', 'Xác nhận mật khẩu mới')}
                                 </label>
                                 <input
                                     type="password"
@@ -179,7 +181,7 @@ const ResetPassword = () => {
                                     value={formData.confirmPassword}
                                     onChange={handleChange}
                                     className={`form-input ${errors.confirmPassword ? 'error' : ''}`}
-                                    placeholder="Nhập lại mật khẩu mới"
+                                    placeholder={t('auth.confirm_password_placeholder', 'Nhập lại mật khẩu')}
                                     disabled={loading || success}
                                 />
                                 {errors.confirmPassword && (
@@ -192,7 +194,7 @@ const ResetPassword = () => {
                                 className="submit-btn"
                                 disabled={loading || success}
                             >
-                                {loading ? 'Đang xử lý...' : success ? 'Thành công!' : 'Đặt lại mật khẩu'}
+                                {loading ? t('auth.processing', 'Đang xử lý...') : success ? t('auth.success', 'Thành công!') : t('auth.reset_password_btn', 'Đặt lại mật khẩu')}
                             </button>
 
                             <div className="back-to-login">
@@ -201,7 +203,7 @@ const ResetPassword = () => {
                                     onClick={() => navigate('/login')}
                                     className="link-btn"
                                 >
-                                    ← Quay lại đăng nhập
+                                    ← {t('auth.back_to_login', 'Quay lại đăng nhập')}
                                 </button>
                             </div>
                         </form>

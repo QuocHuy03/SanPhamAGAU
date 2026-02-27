@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { authService } from '../../services/authService';
 import './Register.css';
 
 const Register = () => {
+  const { t } = useTranslation();
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -30,31 +32,31 @@ const Register = () => {
     const newErrors = {};
 
     if (!formData.name) {
-      newErrors.name = 'Họ tên là bắt buộc';
+      newErrors.name = t('auth.name_required', 'Họ tên là bắt buộc');
     }
 
     if (!formData.email) {
-      newErrors.email = 'Email là bắt buộc';
+      newErrors.email = t('auth.email_required', 'Email là bắt buộc');
     } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
-      newErrors.email = 'Email không hợp lệ';
+      newErrors.email = t('auth.email_invalid', 'Email không hợp lệ');
     }
 
     if (!formData.password) {
-      newErrors.password = 'Mật khẩu là bắt buộc';
+      newErrors.password = t('auth.password_required', 'Mật khẩu là bắt buộc');
     } else if (formData.password.length < 6) {
-      newErrors.password = 'Mật khẩu phải có ít nhất 6 ký tự';
+      newErrors.password = t('auth.password_min_length', 'Mật khẩu phải có ít nhất 6 ký tự');
     }
 
     if (!formData.confirmPassword) {
-      newErrors.confirmPassword = 'Xác nhận mật khẩu là bắt buộc';
+      newErrors.confirmPassword = t('auth.confirm_password_required', 'Xác nhận mật khẩu là bắt buộc');
     } else if (formData.password !== formData.confirmPassword) {
-      newErrors.confirmPassword = 'Mật khẩu không khớp';
+      newErrors.confirmPassword = t('auth.password_mismatch', 'Mật khẩu không khớp');
     }
 
     if (!formData.phone) {
-      newErrors.phone = 'Số điện thoại là bắt buộc';
+      newErrors.phone = t('auth.phone_required', 'Số điện thoại là bắt buộc');
     } else if (!/^\d{10,11}$/.test(formData.phone)) {
-      newErrors.phone = 'Số điện thoại không hợp lệ';
+      newErrors.phone = t('auth.phone_invalid', 'Số điện thoại không hợp lệ');
     }
 
     return newErrors;
@@ -74,11 +76,11 @@ const Register = () => {
       await authService.register(formData);
 
       navigate('/login', {
-        state: { message: 'Đăng ký thành công! Vui lòng đăng nhập.' }
+        state: { message: t('auth.register_success', 'Đăng ký thành công! Vui lòng đăng nhập.') }
       });
     } catch (error) {
       setErrors({
-        submit: error.response?.data?.message || 'Đăng ký thất bại'
+        submit: error.response?.data?.message || t('auth.register_fail', 'Đăng ký thất bại')
       });
     } finally {
       setLoading(false);
@@ -90,7 +92,7 @@ const Register = () => {
       <div className="container">
         <div className="register-wrapper">
           <div className="register-form-container">
-            <h1 className="register-title">Đăng ký tài khoản</h1>
+            <h1 className="register-title">{t('auth.create_account')}</h1>
 
             {errors.submit && (
               <div className="alert alert-danger">
@@ -101,7 +103,7 @@ const Register = () => {
             <form onSubmit={handleSubmit} className="register-form">
               <div className="form-group">
                 <label htmlFor="name" className="form-label">
-                  Họ và tên
+                  {t('profile.fullname')}
                 </label>
                 <input
                   type="text"
@@ -110,7 +112,7 @@ const Register = () => {
                   value={formData.name}
                   onChange={handleChange}
                   className={`form-input ${errors.name ? 'error' : ''}`}
-                  placeholder="Nhập họ tên của bạn"
+                  placeholder={t('auth.name_placeholder', 'Nhập họ tên của bạn')}
                 />
                 {errors.name && (
                   <span className="error-message">{errors.name}</span>
@@ -128,7 +130,7 @@ const Register = () => {
                   value={formData.email}
                   onChange={handleChange}
                   className={`form-input ${errors.email ? 'error' : ''}`}
-                  placeholder="Nhập email của bạn"
+                  placeholder={t('auth.email_placeholder', 'Nhập email của bạn')}
                 />
                 {errors.email && (
                   <span className="error-message">{errors.email}</span>
@@ -138,7 +140,7 @@ const Register = () => {
               <div className="form-row">
                 <div className="form-group">
                   <label htmlFor="password" className="form-label">
-                    Mật khẩu
+                    {t('auth.password')}
                   </label>
                   <input
                     type="password"
@@ -147,7 +149,7 @@ const Register = () => {
                     value={formData.password}
                     onChange={handleChange}
                     className={`form-input ${errors.password ? 'error' : ''}`}
-                    placeholder="Nhập mật khẩu"
+                    placeholder={t('auth.password_placeholder', 'Nhập mật khẩu')}
                   />
                   {errors.password && (
                     <span className="error-message">{errors.password}</span>
@@ -156,7 +158,7 @@ const Register = () => {
 
                 <div className="form-group">
                   <label htmlFor="confirmPassword" className="form-label">
-                    Xác nhận mật khẩu
+                    {t('auth.confirm_password', 'Xác nhận mật khẩu')}
                   </label>
                   <input
                     type="password"
@@ -165,7 +167,7 @@ const Register = () => {
                     value={formData.confirmPassword}
                     onChange={handleChange}
                     className={`form-input ${errors.confirmPassword ? 'error' : ''}`}
-                    placeholder="Nhập lại mật khẩu"
+                    placeholder={t('auth.confirm_password_placeholder', 'Nhập lại mật khẩu')}
                   />
                   {errors.confirmPassword && (
                     <span className="error-message">{errors.confirmPassword}</span>
@@ -175,7 +177,7 @@ const Register = () => {
 
               <div className="form-group">
                 <label htmlFor="phone" className="form-label">
-                  Số điện thoại
+                  {t('profile.phone')}
                 </label>
                 <input
                   type="tel"
@@ -184,7 +186,7 @@ const Register = () => {
                   value={formData.phone}
                   onChange={handleChange}
                   className={`form-input ${errors.phone ? 'error' : ''}`}
-                  placeholder="Nhập số điện thoại"
+                  placeholder={t('auth.phone_placeholder', 'Nhập số điện thoại')}
                 />
                 {errors.phone && (
                   <span className="error-message">{errors.phone}</span>
@@ -194,7 +196,7 @@ const Register = () => {
               <div className="form-agreement">
                 <label className="agreement-checkbox">
                   <input type="checkbox" required />
-                  <span>Tôi đồng ý với <Link to="/terms">Điều khoản dịch vụ</Link> và <Link to="/privacy">Chính sách bảo mật</Link></span>
+                  <span>{t('auth.agree_terms_1', 'Tôi đồng ý với')} <Link to="/terms">{t('auth.terms', 'Điều khoản dịch vụ')}</Link> {t('auth.agree_terms_2', 'và')} <Link to="/privacy">{t('auth.privacy', 'Chính sách bảo mật')}</Link></span>
                 </label>
               </div>
 
@@ -203,11 +205,11 @@ const Register = () => {
                 className="btn-primary register-btn"
                 disabled={loading}
               >
-                {loading ? 'Đang đăng ký...' : 'Đăng ký'}
+                {loading ? t('auth.registering', 'Đang đăng ký...') : t('auth.register')}
               </button>
 
               <div className="login-link">
-                <p>Đã có tài khoản? <Link to="/login">Đăng nhập ngay</Link></p>
+                <p>{t('auth.have_account')} <Link to="/login">{t('auth.login_now', 'Đăng nhập ngay')}</Link></p>
               </div>
             </form>
           </div>

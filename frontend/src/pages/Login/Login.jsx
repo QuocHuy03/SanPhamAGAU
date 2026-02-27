@@ -1,11 +1,14 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
+import { useTranslation } from 'react-i18next';
 import { login } from '../../store/slices/authSlice';
 import { authService } from '../../services/authService';
 import './Login.css';
 
 const Login = () => {
+  console.log('Login component rendering...');
+  const { t } = useTranslation();
   const [formData, setFormData] = useState({
     email: '',
     password: ''
@@ -30,15 +33,15 @@ const Login = () => {
     const newErrors = {};
 
     if (!formData.email) {
-      newErrors.email = 'Email là bắt buộc';
+      newErrors.email = t('auth.email_required', 'Email là bắt buộc');
     } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
-      newErrors.email = 'Email không hợp lệ';
+      newErrors.email = t('auth.email_invalid', 'Email không hợp lệ');
     }
 
     if (!formData.password) {
-      newErrors.password = 'Mật khẩu là bắt buộc';
+      newErrors.password = t('auth.password_required', 'Mật khẩu là bắt buộc');
     } else if (formData.password.length < 6) {
-      newErrors.password = 'Mật khẩu phải có ít nhất 6 ký tự';
+      newErrors.password = t('auth.password_min_length', 'Mật khẩu phải có ít nhất 6 ký tự');
     }
 
     return newErrors;
@@ -65,7 +68,7 @@ const Login = () => {
       navigate('/');
     } catch (error) {
       setErrors({
-        submit: error.response?.data?.message || 'Đăng nhập thất bại'
+        submit: error.response?.data?.message || t('auth.login_fail', 'Đăng nhập thất bại')
       });
     } finally {
       setLoading(false);
@@ -77,7 +80,7 @@ const Login = () => {
       <div className="container">
         <div className="login-wrapper">
           <div className="login-form-container">
-            <h1 className="login-title">Đăng nhập</h1>
+            <h1 className="login-title">{t('auth.login')}</h1>
 
             {errors.submit && (
               <div className="alert alert-danger">
@@ -88,7 +91,7 @@ const Login = () => {
             <form onSubmit={handleSubmit} className="login-form">
               <div className="form-group">
                 <label htmlFor="email" className="form-label">
-                  Email
+                  {t('auth.email')}
                 </label>
                 <input
                   type="email"
@@ -97,7 +100,7 @@ const Login = () => {
                   value={formData.email}
                   onChange={handleChange}
                   className={`form-input ${errors.email ? 'error' : ''}`}
-                  placeholder="Nhập email của bạn"
+                  placeholder={t('auth.email_placeholder', 'Nhập email của bạn')}
                 />
                 {errors.email && (
                   <span className="error-message">{errors.email}</span>
@@ -106,7 +109,7 @@ const Login = () => {
 
               <div className="form-group">
                 <label htmlFor="password" className="form-label">
-                  Mật khẩu
+                  {t('auth.password')}
                 </label>
                 <input
                   type="password"
@@ -115,7 +118,7 @@ const Login = () => {
                   value={formData.password}
                   onChange={handleChange}
                   className={`form-input ${errors.password ? 'error' : ''}`}
-                  placeholder="Nhập mật khẩu"
+                  placeholder={t('auth.password_placeholder', 'Nhập mật khẩu')}
                 />
                 {errors.password && (
                   <span className="error-message">{errors.password}</span>
@@ -124,10 +127,10 @@ const Login = () => {
 
               <div className="form-options">
                 <label className="remember-me">
-                  <input type="checkbox" /> Ghi nhớ đăng nhập
+                  <input type="checkbox" /> {t('auth.remember_me', 'Ghi nhớ đăng nhập')}
                 </label>
                 <Link to="/forgot-password" className="forgot-password">
-                  Quên mật khẩu?
+                  {t('auth.forgot_password')}
                 </Link>
               </div>
 
@@ -136,11 +139,11 @@ const Login = () => {
                 className="btn-primary login-btn"
                 disabled={loading}
               >
-                {loading ? 'Đang đăng nhập...' : 'Đăng nhập'}
+                {loading ? t('auth.logging_in', 'Đang đăng nhập...') : t('auth.login')}
               </button>
 
               <div className="social-login">
-                <p className="divider">Hoặc đăng nhập với</p>
+                <p className="divider">{t('auth.or_login_with', 'Hoặc đăng nhập với')}</p>
                 <div className="social-buttons">
                   <button type="button" className="btn-social google-btn">
                     Google
@@ -152,7 +155,7 @@ const Login = () => {
               </div>
 
               <div className="register-link">
-                <p>Chưa có tài khoản? <Link to="/register">Đăng ký ngay</Link></p>
+                <p>{t('auth.no_account')} <Link to="/register">{t('auth.register_now', 'Đăng ký ngay')}</Link></p>
               </div>
             </form>
           </div>

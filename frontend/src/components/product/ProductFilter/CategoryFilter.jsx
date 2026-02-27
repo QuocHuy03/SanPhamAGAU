@@ -1,18 +1,20 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { CATEGORIES } from '../../../utils/constants';
 
 const CategoryFilter = ({ selectedCategories, onChange }) => {
+  const { t } = useTranslation();
   const handleCategoryChange = (categoryId) => {
     const newCategories = selectedCategories.includes(categoryId)
       ? selectedCategories.filter(id => id !== categoryId)
       : [...selectedCategories, categoryId];
-    
+
     onChange(newCategories);
   };
 
   return (
     <div className="filter-section">
-      <h4>Danh mục</h4>
+      <h4>{t('shop.categories')}</h4>
       <div className="filter-options">
         {CATEGORIES.map((category) => (
           <div key={category.id} className="filter-option">
