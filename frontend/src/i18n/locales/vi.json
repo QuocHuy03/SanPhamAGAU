@@ -123,6 +123,10 @@
     },
     "auth": {
         "login": "Đăng nhập",
+        "email": "Email",
+        "password": "Mật khẩu",
+        "forgot_password": "Quên mật khẩu?",
+        "no_account": "Bạn chưa có tài khoản?",
         "register": "Đăng ký",
         "login_register": "Đăng nhập / Đăng ký",
         "create_account": "Tạo tài khoản",
