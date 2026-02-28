@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import ProductList from '../../components/product/ProductList/ProductList';
@@ -15,33 +15,29 @@ const Home = () => {
   const [featuredProducts, setFeaturedProducts] = useState([]);
   const [newArrivals, setNewArrivals] = useState([]);
   const [bestSellers, setBestSellers] = useState([]);
-  const [saleProducts, setSaleProducts] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    fetchProducts();
-  }, []);
-
-  const fetchProducts = async () => {
+  const fetchProducts = useCallback(async () => {
     try {
       setLoading(true);
-      const [featured, newArrivalsData, bestSellersData, saleData] = await Promise.all([
+      const [featuredData, newData, bestData] = await Promise.all([
         productService.getFeaturedProducts(),
-        productService.getNewArrivals(),
-        productService.getBestSellers(),
-        productService.getSaleProducts()
+        productService.getNewArrivals(4),
+        productService.getBestSellers(4)
       ]);
-
-      setFeaturedProducts(featured);
-      setNewArrivals(newArrivalsData);
-      setBestSellers(bestSellersData);
-      setSaleProducts(saleData);
+      setFeaturedProducts(featuredData);
+      setNewArrivals(newData);
+      setBestSellers(bestData);
     } catch (error) {
-      console.error('Error fetching products:', error);
+      console.error('Error fetching home data:', error);
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    fetchProducts();
+  }, [fetchProducts]);
 
   if (loading) {
     return <LoadingSpinner />;

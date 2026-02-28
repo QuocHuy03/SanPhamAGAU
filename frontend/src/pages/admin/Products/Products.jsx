@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Table, Button, Input, Select, Space, Modal, Image, Tag, Typography, message } from 'antd';
 import {
@@ -31,15 +31,7 @@ const AdminProducts = () => {
     total: 0
   });
 
-  useEffect(() => {
-    fetchProducts();
-  }, [pagination.current, pagination.pageSize, searchTerm, selectedCategory]);
-
-  useEffect(() => {
-    fetchCategories();
-  }, []);
-
-  const fetchProducts = async () => {
+  const fetchProducts = useCallback(async () => {
     try {
       setLoading(true);
       const data = await productService.getProductsWithPagination({
@@ -59,7 +51,24 @@ const AdminProducts = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [pagination.current, pagination.pageSize, searchTerm, selectedCategory]);
+
+  useEffect(() => {
+    fetchProducts();
+  }, [fetchProducts]);
+
+  const fetchCategories = useCallback(async () => {
+    try {
+      const data = await adminService.getAllCategories();
+      setCategories(data);
+    } catch (error) {
+      console.error('Error fetching categories:', error);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchCategories();
+  }, [fetchCategories]);
 
   const handleTableChange = (newPagination) => {
     setPagination(prev => ({
@@ -67,15 +76,6 @@ const AdminProducts = () => {
       current: newPagination.current,
       pageSize: newPagination.pageSize
     }));
-  };
-
-  const fetchCategories = async () => {
-    try {
-      const data = await adminService.getAllCategories();
-      setCategories(data);
-    } catch (error) {
-      console.error('Error fetching categories:', error);
-    }
   };
 
   const showDeleteConfirm = (product) => {

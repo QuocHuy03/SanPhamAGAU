@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import ProductList from '../../components/product/ProductList/ProductList';
@@ -24,15 +24,7 @@ const Shop = () => {
 
   const itemsPerPage = 12;
 
-  useEffect(() => {
-    fetchProducts();
-  }, [searchParams]);
-
-  useEffect(() => {
-    applyFilters();
-  }, [products, filters]);
-
-  const fetchProducts = async () => {
+  const fetchProducts = useCallback(async () => {
     try {
       setLoading(true);
       const category = searchParams.get('category');
@@ -53,9 +45,13 @@ const Shop = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [searchParams]);
 
-  const applyFilters = () => {
+  useEffect(() => {
+    fetchProducts();
+  }, [fetchProducts]);
+
+  const applyFilters = useCallback(() => {
     let filtered = [...products];
 
     // Filter by price
@@ -87,7 +83,11 @@ const Shop = () => {
 
     setFilteredProducts(filtered);
     setCurrentPage(1); // Reset to first page when filters change
-  };
+  }, [products, filters]);
+
+  useEffect(() => {
+    applyFilters();
+  }, [applyFilters]);
 
   const handleFilterChange = (newFilters) => {
     setFilters(newFilters);

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import {
     Form,
@@ -62,21 +62,7 @@ const ProductEdit = () => {
         return () => { isMounted.current = false; };
     }, []);
 
-    useEffect(() => {
-        fetchCategories();
-        if (!isAddMode) {
-            fetchProduct();
-        } else {
-            form.setFieldsValue({
-                status: 'active',
-                featured: false,
-                price: 0,
-                stock: 0
-            });
-        }
-    }, [id, form, isAddMode]);
-
-    const fetchCategories = async () => {
+    const fetchCategories = useCallback(async () => {
         try {
             const data = await adminService.getAllCategories();
             if (isMounted.current) {
@@ -86,9 +72,9 @@ const ProductEdit = () => {
             console.error('Error fetching categories:', error);
             message.error('Không thể tải danh mục');
         }
-    };
+    }, []);
 
-    const fetchProduct = async () => {
+    const fetchProduct = useCallback(async () => {
         try {
             setLoading(true);
             const product = await productService.getProductById(id);
@@ -124,7 +110,21 @@ const ProductEdit = () => {
         } finally {
             if (isMounted.current) setLoading(false);
         }
-    };
+    }, [id, form, navigate]);
+
+    useEffect(() => {
+        fetchCategories();
+        if (!isAddMode) {
+            fetchProduct();
+        } else {
+            form.setFieldsValue({
+                status: 'active',
+                featured: false,
+                price: 0,
+                stock: 0
+            });
+        }
+    }, [fetchCategories, fetchProduct, isAddMode, form]);
 
     const handleNameChange = (e) => {
         const nameValue = e.target.value;

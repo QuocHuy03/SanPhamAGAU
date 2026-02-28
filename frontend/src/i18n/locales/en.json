@@ -71,7 +71,18 @@
         "wishlist": "Wishlist",
         "share": "Share",
         "free_shipping": "FREE SHIPPING",
-        "quality_guarantee": "QUALITY GUARANTEE"
+        "quality_guarantee": "QUALITY GUARANTEE",
+        "customer_reviews": "Customer Reviews",
+        "reviews": "reviews",
+        "write_review": "Write a Review",
+        "your_rating": "Your Rating",
+        "review_placeholder": "Share your experience with this product...",
+        "submit_review": "Submit Review",
+        "all_reviews": "All Reviews",
+        "no_reviews": "No reviews yet for this product",
+        "comment_required": "Please enter your review comment",
+        "review_success": "Thank you for your review!",
+        "login_to_review": "Please login to write a review"
     },
     "cart": {
         "title": "Your Cart",

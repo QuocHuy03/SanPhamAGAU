@@ -72,7 +72,18 @@
         "wishlist": "Yêu thích",
         "share": "Chia sẻ",
         "free_shipping": "FREE SHIPPING",
-        "quality_guarantee": "QUALITY GUARANTEE"
+        "quality_guarantee": "QUALITY GUARANTEE",
+        "customer_reviews": "Đánh giá từ khách hàng",
+        "reviews": "đánh giá",
+        "write_review": "Viết đánh giá của bạn",
+        "your_rating": "Đánh giá của bạn",
+        "review_placeholder": "Chia sẻ cảm nhận của bạn về sản phẩm...",
+        "submit_review": "Gửi đánh giá",
+        "all_reviews": "Tất cả đánh giá",
+        "no_reviews": "Chưa có đánh giá nào cho sản phẩm này",
+        "comment_required": "Vui lòng nhập nội dung đánh giá",
+        "review_success": "Gửi đánh giá thành công!",
+        "login_to_review": "Vui lòng đăng nhập để gửi đánh giá"
     },
     "cart": {
         "title": "Giỏ hàng của bạn",
