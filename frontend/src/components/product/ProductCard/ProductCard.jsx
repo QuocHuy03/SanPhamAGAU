@@ -11,10 +11,10 @@ const ProductCard = ({ product }) => {
 
   const handleAddToCart = () => {
     dispatch(addToCart({
-      id: product.id,
+      id: product._id || product.id,
       name: product.name,
       price: product.price,
-      image: product.images[0],
+      image: product.images?.[0]?.url || product.image,
       quantity: 1
     }));
   };
@@ -22,9 +22,9 @@ const ProductCard = ({ product }) => {
   return (
     <div className="group bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-100 flex flex-col h-full transform hover:-translate-y-1">
       <div className="relative aspect-[4/5] overflow-hidden bg-gray-100">
-        <Link to={`/product/${product.id}`} className="block w-full h-full">
+        <Link to={`/product/${product._id || product.id}`} className="block w-full h-full">
           <img
-            src={product.images[0]}
+            src={product.images?.[0]?.url || product.image}
             alt={product.name}
             className="w-full h-full object-cover object-center group-hover:scale-110 transition-transform duration-700 ease-in-out"
           />

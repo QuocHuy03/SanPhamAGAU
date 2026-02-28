@@ -43,6 +43,25 @@ export const productService = {
     return response.data?.products || [];
   },
 
+  // Get new arrivals (recently added)
+  getNewArrivals: async (limit = 4) => {
+    const response = await api.get('/products', { params: { sort: '-createdAt', limit } });
+    return response.data?.products || [];
+  },
+
+  // Get best sellers
+  getBestSellers: async (limit = 4) => {
+    const response = await api.get('/products', { params: { sort: '-sold', limit } });
+    return response.data?.products || [];
+  },
+
+  // Get products on sale
+  getSaleProducts: async (limit = 4) => {
+    const response = await api.get('/products', { params: { limit } }); // Assuming no specific sale endpoint yet, just getting limited products
+    // Note: In a real app, you'd filter by a 'sale' flag or 'discountPrice'
+    return response.data?.products || [];
+  },
+
   // Get related products
   getRelatedProducts: async (id) => {
     const response = await api.get(`/products/${id}/related`);

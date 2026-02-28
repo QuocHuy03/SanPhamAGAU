@@ -8,12 +8,23 @@ const ColorSelector = ({ colors, selectedColor, onSelectColor }) => {
         return (
           <button
             key={color.name}
-            className={`relative w-10 h-10 rounded-full border-2 transition-all duration-200 hover:scale-110 flex items-center justify-center ${isSelected ? 'border-indigo-600 ring-2 ring-indigo-600/20' : 'border-transparent shadow-sm'}`}
+            className={`group relative w-12 h-12 rounded-full transition-all duration-500 flex items-center justify-center p-0.5 ${isSelected
+                ? 'ring-2 ring-indigo-500 ring-offset-4 shadow-xl shadow-indigo-100 -translate-y-1'
+                : 'ring-1 ring-gray-100 hover:ring-indigo-200 hover:ring-offset-2 hover:-translate-y-1'
+              }`}
             onClick={() => onSelectColor(color)}
-            style={{ backgroundColor: color.code }}
             title={color.name}
           >
-            {isSelected && <span className={`text-xs ${color.code === '#ffffff' ? 'text-black' : 'text-white'} font-bold`}>✓</span>}
+            <div
+              className="w-full h-full rounded-full border border-black/5 flex items-center justify-center"
+              style={{ backgroundColor: color.code }}
+            >
+              {isSelected && (
+                <span className={`text-xs ${color.code.toLowerCase() === '#ffffff' || color.code.toLowerCase() === '#fff' ? 'text-gray-900' : 'text-white'} font-black filter drop-shadow-sm`}>
+                  ✓
+                </span>
+              )}
+            </div>
           </button>
         );
       })}

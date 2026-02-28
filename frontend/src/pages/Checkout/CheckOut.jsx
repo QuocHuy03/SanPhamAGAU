@@ -269,62 +269,55 @@ const CheckOut = () => {
 
         {/* Right Side: Order Summary */}
         <div className="lg:w-1/3">
-          <div className="bg-gray-900 rounded-3xl shadow-2xl p-8 text-white sticky top-28">
-            <h2 className="text-xl font-black mb-8 uppercase tracking-tight border-b border-white/10 pb-4">{t('checkout.order_summary')}</h2>
+          <div className="bg-white rounded-[2.5rem] shadow-[0_20px_50px_rgba(0,0,0,0.05)] p-10 text-gray-900 sticky top-28 border border-gray-100">
+            <h2 className="text-xl font-black mb-10 uppercase tracking-tight border-b border-gray-50 pb-6 flex items-center justify-between">
+              <span>{t('checkout.order_summary')}</span>
+              <span className="text-sm font-bold text-gray-400">{items.length} {t('cart.items')}</span>
+            </h2>
 
-            <div className="space-y-6 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar mb-8">
+            <div className="space-y-6 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar mb-10">
               {items.map(item => (
-                <div key={item.id || item._id} className="flex gap-4 group">
-                  <div className="w-16 h-20 bg-white/10 rounded-lg overflow-hidden flex-shrink-0">
+                <div key={item.id || item._id} className="flex items-center gap-4">
+                  <div className="w-16 h-20 bg-gray-50 rounded-xl overflow-hidden flex-shrink-0 border border-gray-100">
                     <img src={item.images?.[0]?.url || item.image} alt={item.name} className="w-full h-full object-cover" />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <h4 className="text-sm font-bold line-clamp-2 mb-1">{item.name}</h4>
-                    <div className="flex flex-wrap gap-2 text-[10px] text-gray-400 font-bold uppercase tracking-wider">
-                      {item.size && <span>{t('product.size')}: {item.size}</span>}
-                      {item.color && <span>{t('product.color')}: {item.color?.name || item.color}</span>}
-                      <span className="text-indigo-400">x{item.quantity}</span>
+                    <h4 className="text-sm font-bold text-gray-800 line-clamp-1 uppercase tracking-tight">{item.name}</h4>
+                    <div className="flex items-center gap-3 text-[10px] text-gray-400 font-bold uppercase mt-1">
+                      {item.size && <span>{item.size}</span>}
+                      {item.color && <span>{item.color?.name || item.color}</span>}
+                      <span className="text-indigo-600">x{item.quantity}</span>
                     </div>
                   </div>
-                  <div className="text-right flex-shrink-0">
-                    <span className="text-sm font-black whitespace-nowrap">{(item.price * item.quantity).toLocaleString()}đ</span>
+                  <div className="text-right">
+                    <span className="text-sm font-bold text-gray-900">{(item.price * item.quantity).toLocaleString()}đ</span>
                   </div>
                 </div>
               ))}
             </div>
 
-            <div className="space-y-4 pt-8 border-t border-white/10">
-              <div className="flex justify-between text-gray-400 text-sm font-medium">
+            <div className="space-y-4 pt-10 border-t border-gray-50">
+              <div className="flex justify-between text-gray-500 text-sm font-bold uppercase tracking-tight">
                 <span>{t('cart.subtotal')}</span>
-                <span>{calculateSubtotal().toLocaleString()}đ</span>
+                <span className="text-gray-900">{(calculateSubtotal()).toLocaleString()}đ</span>
               </div>
-              <div className="flex justify-between items-center text-sm font-medium">
-                <span className="text-gray-400">{t('cart.shipping')}</span>
-                <span className={shippingFee === 0 ? 'text-emerald-400 font-black' : ''}>
+              <div className="flex justify-between items-center text-sm font-bold uppercase tracking-tight">
+                <span className="text-gray-500">{t('cart.shipping')}</span>
+                <span className={shippingFee === 0 ? 'text-emerald-500' : 'text-gray-900'}>
                   {shippingFee === 0 ? t('cart.free').toUpperCase() : `${shippingFee.toLocaleString()}đ`}
                 </span>
               </div>
 
-              <div className="pt-6 border-t border-white/10 flex justify-between items-end">
-                <span className="font-black text-lg">{t('cart.total').toUpperCase()}</span>
-                <div className="text-right">
-                  <span className="text-3xl font-black text-indigo-400 tracking-tight">
-                    {calculateTotal().toLocaleString()}đ
-                  </span>
-                </div>
-              </div>
-            </div>
-
-            <div className="mt-8 p-4 bg-white/5 rounded-2xl border border-white/10">
-              <div className="flex gap-3 items-center">
-                <span className="text-2xl">✨</span>
-                <p className="text-[10px] text-gray-300 leading-relaxed font-medium">
-                  {t('checkout.agree_terms')}
-                </p>
+              <div className="pt-8 border-t border-gray-100 flex justify-between items-center">
+                <span className="font-black text-lg text-gray-900 uppercase tracking-tight">{t('cart.total')}</span>
+                <span className="text-3xl font-black text-indigo-600 tracking-tighter">
+                  {calculateTotal().toLocaleString()}đ
+                </span>
               </div>
             </div>
           </div>
         </div>
+
       </div>
     </div>
   );

@@ -116,7 +116,14 @@ const productSchema = new mongoose.Schema({
     default: Date.now
   }
 }, {
-  timestamps: true
+  timestamps: true,
+  toJSON: { virtuals: true },
+  toObject: { virtuals: true }
+});
+
+// Virtual for inStock
+productSchema.virtual('inStock').get(function () {
+  return this.stock > 0 && this.status === 'active';
 });
 
 // Calculate discount percent before save

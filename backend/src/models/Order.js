@@ -99,8 +99,8 @@ const orderSchema = new mongoose.Schema({
   timestamps: true
 });
 
-// Generate order number before save
-orderSchema.pre('save', function (next) {
+// Generate order number before validation
+orderSchema.pre('validate', function (next) {
   if (!this.orderNumber) {
     const date = new Date();
     const year = date.getFullYear().toString().substr(-2);
