@@ -21,7 +21,8 @@ import {
     ArrowLeftOutlined,
     PlusOutlined,
     SaveOutlined,
-    ReloadOutlined
+    ReloadOutlined,
+    DeleteOutlined
 } from '@ant-design/icons';
 import { productService } from '../../../services/productService';
 import { adminService } from '../../../services/adminService';
@@ -111,6 +112,8 @@ const ProductEdit = () => {
                 stock: product.stock || 0,
                 status: product.status || 'active',
                 featured: product.featured || false,
+                sizes: product.sizes || [],
+                colors: product.colors || []
             });
             setExistingImages(product.images || []);
         } catch (error) {
@@ -301,6 +304,82 @@ const ProductEdit = () => {
                                     placeholder="Mô tả chi tiết về sản phẩm..."
                                 />
                             </Form.Item>
+                        </Card>
+
+                        {/* Sizes and Colors Section */}
+                        <Card loading={loading} style={{ marginBottom: 24 }}>
+                            <Title level={5}>Biến thể sản phẩm</Title>
+                            <Divider style={{ marginTop: 12, marginBottom: 24 }} />
+
+                            <Form.Item
+                                name="sizes"
+                                label="Kích thước (Size)"
+                                tooltip="Nhấn Enter để thêm mới nếu không có trong danh sách"
+                            >
+                                <Select
+                                    mode="tags"
+                                    style={{ width: '100%' }}
+                                    placeholder="Chọn hoặc nhập size (S, M, L, XL, 38, 39...)"
+                                    tokenSeparators={[',']}
+                                >
+                                    <Option value="S">S</Option>
+                                    <Option value="M">M</Option>
+                                    <Option value="L">L</Option>
+                                    <Option value="XL">XL</Option>
+                                    <Option value="XXL">XXL</Option>
+                                    <Option value="Free Size">Free Size</Option>
+                                </Select>
+                            </Form.Item>
+
+                            <div style={{ marginBottom: 8 }}>
+                                <Text strong>Màu sắc</Text>
+                            </div>
+                            <Form.List name="colors">
+                                {(fields, { add, remove }) => (
+                                    <>
+                                        {fields.map(({ key, name, ...restField }) => (
+                                            <Row key={key} gutter={16} align="middle" style={{ marginBottom: 12 }}>
+                                                <Col span={10}>
+                                                    <Form.Item
+                                                        {...restField}
+                                                        name={[name, 'name']}
+                                                        rules={[{ required: true, message: 'Nhập tên màu' }]}
+                                                        style={{ marginBottom: 0 }}
+                                                    >
+                                                        <Input placeholder="Tên màu (VD: Đỏ)" />
+                                                    </Form.Item>
+                                                </Col>
+                                                <Col span={10}>
+                                                    <Form.Item
+                                                        {...restField}
+                                                        name={[name, 'code']}
+                                                        rules={[{ required: true, message: 'Chọn mã màu' }]}
+                                                        style={{ marginBottom: 0 }}
+                                                    >
+                                                        <Input
+                                                            type="color"
+                                                            style={{ padding: '0 4px', height: 40 }}
+                                                        />
+                                                    </Form.Item>
+                                                </Col>
+                                                <Col span={4}>
+                                                    <Button
+                                                        type="text"
+                                                        danger
+                                                        icon={<DeleteOutlined />}
+                                                        onClick={() => remove(name)}
+                                                    />
+                                                </Col>
+                                            </Row>
+                                        ))}
+                                        <Form.Item>
+                                            <Button type="dashed" onClick={() => add()} block icon={<PlusOutlined />}>
+                                                Thêm màu sắc
+                                            </Button>
+                                        </Form.Item>
+                                    </>
+                                )}
+                            </Form.List>
                         </Card>
 
                         <Card loading={loading}>

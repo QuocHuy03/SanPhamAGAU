@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useDispatch } from 'react-redux';
 import { FaStar, FaShoppingCart, FaHeart, FaShareAlt, FaPlus, FaMinus } from 'react-icons/fa';
@@ -13,9 +13,18 @@ import ColorSelector from './ColorSelector';
 const ProductDetail = ({ product }) => {
   const { t } = useTranslation();
   const dispatch = useDispatch();
-  const [selectedSize, setSelectedSize] = useState(product.sizes?.[0] || '');
-  const [selectedColor, setSelectedColor] = useState(product.colors?.[0] || null);
+
+  // Refined initial state for variants
+  const [selectedSize, setSelectedSize] = useState(product?.sizes?.[0] || '');
+  const [selectedColor, setSelectedColor] = useState(product?.colors?.[0] || null);
   const [quantity, setQuantity] = useState(1);
+
+  // Sync state when product changes (useful if navigation happens within detail pages)
+  useEffect(() => {
+    setSelectedSize(product?.sizes?.[0] || '');
+    setSelectedColor(product?.colors?.[0] || null);
+    setQuantity(1);
+  }, [product?._id, product?.id, product?.sizes, product?.colors]);
 
   const handleAddToCart = () => {
     dispatch(addToCart({

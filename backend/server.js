@@ -24,13 +24,15 @@ app.use((req, res, next) => {
   next();
 });
 
-// Rate limiting
+// Rate limiting - Disabled by user request to fix 429 errors
+/*
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 phút
   max: 100, // giới hạn 100 requests
   message: 'Too many requests from this IP'
 });
 app.use('/api', limiter);
+*/
 
 // ========== KẾT NỐI DB ==========
 connectDB().then(() => {

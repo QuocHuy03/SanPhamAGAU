@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { Table, Button, Input, Select, Space, Modal, Image, Tag, Typography, message } from 'antd';
 import {
   PlusOutlined,
@@ -11,8 +11,7 @@ import {
 } from '@ant-design/icons';
 import { adminService } from '../../../services/adminService';
 import { productService } from '../../../services/productService';
-import { formatCurrency, formatDate } from '../../../utils/helpers';
-// import './Products.css'; // Removed old CSS
+import { formatCurrency } from '../../../utils/helpers';
 
 const { Title } = Typography;
 const { Option } = Select;
@@ -49,7 +48,6 @@ const AdminProducts = () => {
         search: searchTerm,
         category: selectedCategory
       });
-      console.log('API Response:', data); // Giữ lại log để debug
       setProducts(data?.products || data?.data?.products || []);
       setPagination(prev => ({
         ...prev,
@@ -104,8 +102,6 @@ const AdminProducts = () => {
       console.error('Error deleting product:', error);
     }
   };
-
-  // Removed client-side filtering
 
   const columns = [
     {
@@ -177,15 +173,10 @@ const AdminProducts = () => {
       align: 'center',
       key: 'status',
       render: (_, record) => (
-        <Tag color={record.inStock ? 'green' : 'red'}>
-          {record.inStock ? 'Còn hàng' : 'Hết hàng'}
+        <Tag color={record.stock > 0 ? 'green' : 'red'}>
+          {record.stock > 0 ? 'Còn hàng' : 'Hết hàng'}
         </Tag>
       ),
-      filters: [
-        { text: 'Còn hàng', value: true },
-        { text: 'Hết hàng', value: false },
-      ],
-      onFilter: (value, record) => record.inStock === value,
     },
     {
       title: 'Thao tác',
