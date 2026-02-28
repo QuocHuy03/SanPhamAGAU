@@ -114,7 +114,7 @@
         "sort_newest": "Newest",
         "sort_price_asc": "Price: Low to High",
         "sort_price_desc": "Price: High to Low",
-        "filter_title": "Filters",
+        "filters": "Filters",
         "clear_filters": "Clear Filters",
         "price_range": "Price Range",
         "categories": "Categories",

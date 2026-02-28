@@ -1,3 +1,5 @@
+import React, { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import ProductList from '../../components/product/ProductList/ProductList';
 import ProductFilter from '../../components/product/ProductFilter/ProductFilter';
@@ -104,16 +106,34 @@ const Shop = () => {
   return (
     <div className="bg-gray-50 min-h-screen pb-12">
       {/* Page Header */}
-      <div className="bg-white border-b border-gray-200">
-        <div className="max-w-[1300px] mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12">
-          <h1 className="text-4xl font-black text-gray-900 tracking-tight mb-2">{t('shop.title')}</h1>
-          <p className="text-gray-500 text-lg">
-            {t('shop.description', { count: filteredProducts.length })}
-          </p>
+      <div className="bg-white border-b border-gray-100 mb-8 overflow-hidden relative">
+        <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-50 rounded-full -mr-32 -mt-32 opacity-50"></div>
+        <div className="absolute bottom-0 left-0 w-32 h-32 bg-purple-50 rounded-full -ml-16 -mb-16 opacity-50"></div>
+
+        <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-16 relative z-10">
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
+            <div>
+              <nav className="flex mb-4 text-xs font-bold text-indigo-600 uppercase tracking-widest">
+                <a href="/" className="hover:text-indigo-800 transition-colors">Trang chủ</a>
+                <span className="mx-2 text-gray-300">/</span>
+                <span className="text-gray-400">Cửa hàng</span>
+              </nav>
+              <h1 className="text-4xl md:text-5xl font-black text-gray-900 tracking-tight mb-4">
+                {t('shop.title')}
+              </h1>
+              <p className="text-gray-500 text-lg max-w-xl leading-relaxed">
+                {t('shop.description', { count: filteredProducts.length })}
+              </p>
+            </div>
+            <div className="flex items-center space-x-2 text-sm text-gray-400 font-medium">
+              <span className="w-8 h-[2px] bg-indigo-600"></span>
+              <span>{filteredProducts.length} {t('common.products').toLowerCase()}</span>
+            </div>
+          </div>
         </div>
       </div>
 
-      <div className="max-w-[1300px] mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="flex flex-col lg:flex-row gap-8 lg:gap-12">
 
           {/* Filters Sidebar */}
@@ -135,7 +155,7 @@ const Shop = () => {
               </span>
               <div className="flex items-center space-x-2">
                 <span className="text-sm text-gray-500">{t('shop.sort_by')}:</span>
-                <select className="text-sm border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500 h-9 bg-gray-50 text-gray-700 font-medium cursor-pointer">
+                <select className="text-sm border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500 bg-gray-50 text-gray-700 font-medium cursor-pointer py-1.5 px-3 h-auto leading-normal">
                   <option value="newest">{t('shop.sort_newest')}</option>
                   <option value="price-asc">{t('shop.sort_price_asc')}</option>
                   <option value="price-desc">{t('shop.sort_price_desc')}</option>
@@ -151,7 +171,7 @@ const Shop = () => {
               <div className="space-y-12">
                 <ProductList
                   products={currentProducts}
-                  columns={3}
+                  columns={4}
                   loading={loading}
                 />
 

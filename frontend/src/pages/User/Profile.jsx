@@ -93,7 +93,7 @@ const UserProfile = () => {
 
     return (
         <div className="min-h-screen bg-gray-50 py-10 px-4 sm:px-6 lg:px-8 font-sans">
-            <div className="max-w-[1300px] mx-auto flex flex-col md:flex-row gap-8">
+            <div className="max-w-[1600px] mx-auto flex flex-col md:flex-row gap-8">
                 {/* Sidebar */}
                 <aside className="w-full md:w-80 flex-shrink-0">
                     <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 mb-6">

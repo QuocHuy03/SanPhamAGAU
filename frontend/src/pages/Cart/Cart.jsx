@@ -2,7 +2,7 @@ import React from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
-import { FaTrash, FaPlus, FaMinus, FaArrowLeft } from 'react-icons/fa';
+import { FaTrash, FaPlus, FaMinus, FaArrowLeft, FaShoppingCart } from 'react-icons/fa';
 import { removeFromCart, updateQuantity, clearCart } from '../../store/slices/cartSlice';
 import { formatCurrency } from '../../utils/helpers';
 // import './Cart.css';

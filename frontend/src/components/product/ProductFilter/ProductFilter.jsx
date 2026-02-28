@@ -1,3 +1,4 @@
+import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import PriceFilter from './PriceFilter';
 import CategoryFilter from './CategoryFilter';
@@ -14,28 +15,35 @@ const ProductFilter = ({ onFilterChange }) => {
     colors: []
   });
 
+  useEffect(() => {
+    onFilterChange(filters);
+  }, [filters]);
+
   const handleFilterChange = (filterType, value) => {
     const newFilters = { ...filters, [filterType]: value };
     setFilters(newFilters);
-    onFilterChange(newFilters);
   };
 
   const handleClearFilters = () => {
-    const clearedFilters = {
+    setFilters({
       priceRange: [0, 1000000],
       categories: [],
       sizes: [],
       colors: []
-    };
-    setFilters(clearedFilters);
-    onFilterChange(clearedFilters);
+    });
   };
 
   return (
-    <div className="product-filter">
-      <div className="filter-header">
-        <h3>{t('shop.filter_title')}</h3>
-        <button className="clear-filters" onClick={handleClearFilters}>
+    <div className="animate-fadeIn">
+      <div className="flex items-center justify-between mb-8 pb-4 border-b border-gray-100">
+        <h2 className="text-xl font-black text-gray-900 tracking-tight flex items-center">
+          <span className="w-2 h-6 bg-indigo-600 rounded-full mr-3 shadow-[0_0_10px_rgba(79,70,229,0.3)]"></span>
+          {t('shop.filters')}
+        </h2>
+        <button
+          className="text-xs font-bold text-indigo-600 hover:text-indigo-800 transition-colors uppercase tracking-widest bg-indigo-50 px-3 py-1.5 rounded-lg"
+          onClick={handleClearFilters}
+        >
           {t('shop.clear_filters')}
         </button>
       </div>

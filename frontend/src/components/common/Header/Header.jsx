@@ -25,7 +25,7 @@ const Header = () => {
 
   return (
     <header className={`sticky top-0 z-50 transition-all duration-300 ${isScrolled ? 'bg-white/90 backdrop-blur-md shadow-md py-3' : 'bg-white shadow-sm py-4'}`}>
-      <div className="max-w-[1300px] mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between">
           {/* Logo */}
           <div className="flex-shrink-0">
@@ -35,7 +35,7 @@ const Header = () => {
           </div>
 
           {/* Search Bar - Hidden on mobile, flex on md+ */}
-          <div className="hidden md:flex flex-1 max-w-xl mx-8">
+          <div className="hidden md:flex flex-1 max-w-2xl mx-12">
             <SearchBar />
           </div>
 

@@ -13,18 +13,26 @@ const SizeFilter = ({ selectedSizes, onChange }) => {
   };
 
   return (
-    <div className="filter-section">
-      <h4>{t('shop.sizes')}</h4>
-      <div className="size-options">
-        {SIZES.map((size) => (
-          <button
-            key={size}
-            className={`size-option ${selectedSizes.includes(size) ? 'selected' : ''}`}
-            onClick={() => handleSizeChange(size)}
-          >
-            {size}
-          </button>
-        ))}
+    <div className="mb-8">
+      <h3 className="text-sm font-bold text-gray-900 uppercase tracking-wider mb-4">
+        {t('shop.sizes')}
+      </h3>
+      <div className="grid grid-cols-4 gap-2">
+        {SIZES.map((size) => {
+          const isActive = selectedSizes.includes(size);
+          return (
+            <button
+              key={size}
+              onClick={() => handleSizeChange(size)}
+              className={`h-11 rounded-xl border-2 font-black text-xs transition-all duration-300 transform active:scale-90 ${isActive
+                  ? 'bg-indigo-600 border-indigo-600 text-white shadow-lg shadow-indigo-100'
+                  : 'bg-white border-gray-100 text-gray-600 hover:border-indigo-300 hover:text-indigo-600'
+                }`}
+            >
+              {size}
+            </button>
+          );
+        })}
       </div>
     </div>
   );

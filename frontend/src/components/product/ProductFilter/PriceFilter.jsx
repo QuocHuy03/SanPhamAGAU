@@ -1,44 +1,30 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
+import { Slider } from 'antd';
 
 const PriceFilter = ({ priceRange, onChange }) => {
   const { t } = useTranslation();
-  const handleChange = (e) => {
-    const value = parseInt(e.target.value);
-    const newRange = [...priceRange];
 
-    if (e.target.name === 'min') {
-      newRange[0] = value;
-    } else {
-      newRange[1] = value;
-    }
-
-    onChange(newRange);
+  const handleSliderChange = (value) => {
+    onChange(value);
   };
 
   return (
     <div className="filter-section">
-      <h4>{t('shop.price_range')}</h4>
-      <div className="price-slider">
-        <input
-          type="range"
-          min="0"
-          max="1000000"
-          step="10000"
-          value={priceRange[0]}
-          onChange={handleChange}
-          name="min"
-          className="price-slider-input"
-        />
-        <input
-          type="range"
-          min="0"
-          max="1000000"
-          step="10000"
-          value={priceRange[1]}
-          onChange={handleChange}
-          name="max"
-          className="price-slider-input"
+      <h4 className="text-sm font-bold text-gray-900 uppercase tracking-wider mb-6">{t('shop.price_range')}</h4>
+      <div className="px-2">
+        <Slider
+          range
+          min={0}
+          max={1000000}
+          step={10000}
+          value={priceRange}
+          onChange={handleSliderChange}
+          trackStyle={[{ backgroundColor: '#6366f1' }]}
+          handleStyle={[
+            { borderColor: '#6366f1', backgroundColor: '#fff' },
+            { borderColor: '#6366f1', backgroundColor: '#fff' }
+          ]}
         />
       </div>
       <div className="price-range">

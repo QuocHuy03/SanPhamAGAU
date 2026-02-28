@@ -13,18 +13,30 @@ const ColorFilter = ({ selectedColors, onChange }) => {
   };
 
   return (
-    <div className="filter-section">
-      <h4>{t('shop.colors')}</h4>
-      <div className="color-options">
-        {COLORS.map((color) => (
-          <button
-            key={color.name}
-            className={`color-option ${selectedColors.includes(color.name) ? 'selected' : ''}`}
-            onClick={() => handleColorChange(color.name)}
-            style={{ backgroundColor: color.code }}
-            title={color.name}
-          />
-        ))}
+    <div className="mb-4">
+      <h3 className="text-sm font-bold text-gray-900 uppercase tracking-wider mb-4">
+        {t('shop.colors')}
+      </h3>
+      <div className="flex flex-wrap gap-3">
+        {COLORS.map((color) => {
+          const isActive = selectedColors.includes(color.name);
+          return (
+            <button
+              key={color.name}
+              className={`relative w-9 h-9 rounded-full border-2 transition-all duration-300 transform hover:scale-110 active:scale-95 ${isActive ? 'border-indigo-600 ring-4 ring-indigo-50' : 'border-transparent shadow-sm'
+                }`}
+              onClick={() => handleColorChange(color.name)}
+              style={{ backgroundColor: color.code }}
+              title={color.name}
+            >
+              {isActive && (
+                <span className={`flex items-center justify-center h-full w-full bg-black/10 rounded-full text-white text-[10px] font-bold`}>
+                  ✓
+                </span>
+              )}
+            </button>
+          );
+        })}
       </div>
     </div>
   );

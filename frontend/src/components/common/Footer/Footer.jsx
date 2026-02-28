@@ -1,13 +1,31 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-// import './Footer.css';
+import { categoryService } from '../../../services/categoryService';
 
 const Footer = () => {
   const { t } = useTranslation();
+  const [categories, setCategories] = useState([]);
+
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const response = await categoryService.getCategories();
+        if (response.status === 'success') {
+          // Take only first 4 categories for footer
+          setCategories(response.data.flatCategories?.slice(0, 4) || []);
+        }
+      } catch (error) {
+        console.error('Error fetching categories in footer:', error);
+      }
+    };
+
+    fetchCategories();
+  }, []);
+
   return (
     <footer className="bg-gray-900 pt-16 pb-8 text-gray-300 font-sans border-t border-gray-800">
-      <div className="max-w-[1300px] mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-12">
           {/* Company Info */}
           <div className="space-y-4">
@@ -39,10 +57,21 @@ const Footer = () => {
           <div>
             <h3 className="text-sm font-bold text-white uppercase tracking-wider mb-4">{t('common.categories', 'Danh mục')}</h3>
             <ul className="space-y-3 text-sm">
-              <li><Link to="/shop?category=ao-thun" className="text-gray-400 hover:text-indigo-400 transition-colors">Áo thun</Link></li>
-              <li><Link to="/shop?category=ao-so-mi" className="text-gray-400 hover:text-indigo-400 transition-colors">Áo sơ mi</Link></li>
-              <li><Link to="/shop?category=quan-jean" className="text-gray-400 hover:text-indigo-400 transition-colors">Quần jean</Link></li>
-              <li><Link to="/shop?category=dam-vay" className="text-gray-400 hover:text-indigo-400 transition-colors">Đầm/Váy</Link></li>
+              {categories.map((category) => (
+                <li key={category._id}>
+                  <Link to={`/shop?category=${category.slug}`} className="text-gray-400 hover:text-indigo-400 transition-colors">
+                    {category.name}
+                  </Link>
+                </li>
+              ))}
+              {categories.length === 0 && (
+                <>
+                  <li><Link to="/shop?category=ao-thun" className="text-gray-400 hover:text-indigo-400 transition-colors">Áo thun</Link></li>
+                  <li><Link to="/shop?category=ao-so-mi" className="text-gray-400 hover:text-indigo-400 transition-colors">Áo sơ mi</Link></li>
+                  <li><Link to="/shop?category=quan-jean" className="text-gray-400 hover:text-indigo-400 transition-colors">Quần jean</Link></li>
+                  <li><Link to="/shop?category=dam-vay" className="text-gray-400 hover:text-indigo-400 transition-colors">Đầm/Váy</Link></li>
+                </>
+              )}
             </ul>
           </div>
 
