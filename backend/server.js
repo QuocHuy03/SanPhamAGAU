@@ -74,6 +74,8 @@ app.use('/api/products', require('./src/routes/productRoutes'));
 app.use('/api/categories', require('./src/routes/categoryRoutes'));
 app.use('/api/orders', require('./src/routes/orderRoutes'));
 app.use('/api/cart', require('./src/routes/cartRoutes'));
+app.use('/api/wishlist', require('./src/routes/wishlistRoutes'));
+app.use('/api/coupons', require('./src/routes/couponRoutes'));
 
 // 404 handler
 app.use('*', (req, res) => {

@@ -36,9 +36,9 @@ const Footer = () => {
               {t('common.footer_desc', 'Chuyên cung cấp quần áo thời trang chất lượng cao với phong cách hiện đại, thanh lịch.')}
             </p>
             <div className="flex space-x-4 pt-2">
-              <a href="#" className="w-10 h-10 rounded-full bg-gray-800 flex items-center justify-center hover:bg-indigo-600 hover:text-white transition-colors duration-300">fb</a>
-              <a href="#" className="w-10 h-10 rounded-full bg-gray-800 flex items-center justify-center hover:bg-pink-600 hover:text-white transition-colors duration-300">ig</a>
-              <a href="#" className="w-10 h-10 rounded-full bg-gray-800 flex items-center justify-center hover:bg-blue-400 hover:text-white transition-colors duration-300">tw</a>
+              <a href="javascript:void(0)" className="w-10 h-10 rounded-full bg-gray-800 flex items-center justify-center hover:bg-indigo-600 hover:text-white transition-colors duration-300">fb</a>
+              <a href="javascript:void(0)" className="w-10 h-10 rounded-full bg-gray-800 flex items-center justify-center hover:bg-pink-600 hover:text-white transition-colors duration-300">ig</a>
+              <a href="javascript:void(0)" className="w-10 h-10 rounded-full bg-gray-800 flex items-center justify-center hover:bg-blue-400 hover:text-white transition-colors duration-300">tw</a>
             </div>
           </div>
 
@@ -97,8 +97,8 @@ const Footer = () => {
         <div className="pt-8 border-t border-gray-800 flex flex-col md:flex-row justify-between items-center text-sm text-gray-500">
           <p>&copy; {new Date().getFullYear()} STT. {t('common.rights', 'Tất cả quyền được bảo lưu.')}</p>
           <div className="flex space-x-4 mt-4 md:mt-0">
-            <a href="#" className="hover:text-white transition-colors">Privacy Policy</a>
-            <a href="#" className="hover:text-white transition-colors">Terms of Service</a>
+            <a href="javascript:void(0)" className="hover:text-white transition-colors">Privacy Policy</a>
+            <a href="javascript:void(0)" className="hover:text-white transition-colors">Terms of Service</a>
           </div>
         </div>
       </div>

@@ -19,12 +19,15 @@ import AdminProducts from './pages/admin/Products/Products.jsx';
 import AdminProductEdit from './pages/admin/Products/ProductEdit.jsx';
 import AdminUsers from './pages/admin/Users/Users.jsx';
 import AdminCategories from './pages/admin/Categories/Categories.jsx';
+import AdminCoupons from './pages/admin/Coupons/AdminCoupons';
 import AdminSettings from './pages/admin/Settings/Settings.jsx';
 import UserProfile from './pages/User/Profile.jsx';
 import Contact from './pages/Contact/Contact.jsx';
 import About from './pages/About/About.jsx';
+import Wishlist from './pages/Wishlist/Wishlist.jsx';
 import AdminLayout from './layouts/AdminLayout.jsx';
 import MainLayout from './layouts/MainLayout.jsx';
+import FloatingChat from './components/common/FloatingChat/FloatingChat.jsx';
 
 
 // Redundant inline MainLayout removed, now using src/layouts/MainLayout.jsx
@@ -99,6 +102,16 @@ function App() {
             <About />
           </MainLayout>
         } />
+        <Route path="/wishlist" element={
+          <MainLayout>
+            <Wishlist />
+          </MainLayout>
+        } />
+        <Route path="/product/slug/:slug" element={
+          <MainLayout>
+            <ProductDetailPage />
+          </MainLayout>
+        } />
 
         {/* Admin Routes - No Header/Footer */}
         <Route path="/admin" element={<AdminLayout />}>
@@ -109,9 +122,11 @@ function App() {
           <Route path="orders" element={<AdminOrders />} />
           <Route path="users" element={<AdminUsers />} />
           <Route path="categories" element={<AdminCategories />} />
+          <Route path="coupons" element={<AdminCoupons />} />
           <Route path="settings" element={<AdminSettings />} />
         </Route>
       </Routes>
+      <FloatingChat />
     </div>
   );
 }

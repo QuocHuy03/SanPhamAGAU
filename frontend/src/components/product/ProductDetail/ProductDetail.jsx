@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
-import { FaStar, FaShoppingCart, FaHeart, FaShareAlt, FaPlus, FaMinus } from 'react-icons/fa';
+import { FaStar, FaShoppingCart, FaPlus, FaMinus } from 'react-icons/fa';
 import { message } from 'antd';
 import { addToCart } from '../../../store/slices/cartSlice';
 import { formatCurrency } from '../../../utils/helpers';

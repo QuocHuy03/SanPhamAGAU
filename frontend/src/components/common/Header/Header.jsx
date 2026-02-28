@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { useTranslation } from 'react-i18next';
-import { FaShoppingCart, FaUser, FaBars, FaTimes } from 'react-icons/fa';
+import { FaBars, FaTimes, FaRegHeart } from 'react-icons/fa';
 // import './Header.css';
 import CartIcon from './CartIcon';
 import SearchBar from './SearchBar';
@@ -13,6 +13,7 @@ const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const { itemCount } = useSelector((state) => state.cart);
+  const { items: wishlistItems } = useSelector((state) => state.wishlist);
   const { isAuthenticated, user } = useSelector((state) => state.auth);
 
   useEffect(() => {
@@ -44,6 +45,15 @@ const Header = () => {
             <div className="hidden sm:block">
               <LanguageSwitcher />
             </div>
+
+            <Link to="/wishlist" className="relative p-2 text-gray-600 hover:text-rose-500 transition-colors">
+              <FaRegHeart className="text-xl" />
+              {wishlistItems.length > 0 && (
+                <span className="absolute -top-1 -right-1 bg-rose-500 text-white text-[10px] font-black w-4 h-4 flex items-center justify-center rounded-full border-2 border-white shadow-sm animate-bounce-short">
+                  {wishlistItems.length}
+                </span>
+              )}
+            </Link>
 
             <Link to="/cart" className="relative p-2 text-gray-600 hover:text-indigo-600 transition-colors">
               <CartIcon count={itemCount} />

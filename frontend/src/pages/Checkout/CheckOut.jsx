@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
 import { clearCart } from '../../store/slices/cartSlice';
+import { validateCoupon, removeCoupon } from '../../store/slices/couponSlice';
 import { orderService } from '../../services/orderService';
 // import './CheckOut.css';
 
@@ -12,7 +13,9 @@ const CheckOut = () => {
   const dispatch = useDispatch();
   const { items } = useSelector((state) => state.cart);
   const { user } = useSelector((state) => state.auth);
+  const { appliedCoupon, loading: couponLoading } = useSelector((state) => state.coupon);
   const [loading, setLoading] = useState(false);
+  const [couponCode, setCouponCode] = useState('');
 
   const [formData, setFormData] = useState({
     fullName: user?.name || '',
@@ -38,7 +41,28 @@ const CheckOut = () => {
   const calculateTotal = () => {
     const subtotal = calculateSubtotal();
     const shipping = subtotal > 500000 ? 0 : 30000;
-    return subtotal + shipping;
+    let total = subtotal + shipping;
+
+    if (appliedCoupon) {
+      if (appliedCoupon.type === 'percentage') {
+        total -= (subtotal * appliedCoupon.value) / 100;
+      } else {
+        total -= appliedCoupon.value;
+      }
+    }
+
+    return Math.max(0, total);
+  };
+
+  const handleApplyCoupon = (e) => {
+    e.preventDefault();
+    if (!couponCode.trim()) return;
+    dispatch(validateCoupon({ code: couponCode, amount: calculateSubtotal() }));
+  };
+
+  const handleRemoveCoupon = () => {
+    dispatch(removeCoupon());
+    setCouponCode('');
   };
 
   const shippingFee = calculateSubtotal() > 500000 ? 0 : 30000;
@@ -88,6 +112,7 @@ const CheckOut = () => {
         shippingFee,
         subtotal,
         total,
+        coupon: appliedCoupon?._id || appliedCoupon?.id,
         note: formData.note
       };
 
@@ -301,11 +326,58 @@ const CheckOut = () => {
                 <span>{t('cart.subtotal')}</span>
                 <span className="text-gray-900">{(calculateSubtotal()).toLocaleString()}đ</span>
               </div>
+
               <div className="flex justify-between items-center text-sm font-bold uppercase tracking-tight">
                 <span className="text-gray-500">{t('cart.shipping')}</span>
                 <span className={shippingFee === 0 ? 'text-emerald-500' : 'text-gray-900'}>
                   {shippingFee === 0 ? t('cart.free').toUpperCase() : `${shippingFee.toLocaleString()}đ`}
                 </span>
+              </div>
+
+              {appliedCoupon && (
+                <div className="flex justify-between items-center text-sm font-bold uppercase tracking-tight text-emerald-600">
+                  <div className="flex items-center gap-2">
+                    <span>GIẢM GIÁ ({appliedCoupon.code})</span>
+                    <button onClick={handleRemoveCoupon} className="text-gray-400 hover:text-rose-500 transition-colors">
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                    </button>
+                  </div>
+                  <span>-{appliedCoupon.type === 'percentage' ? `${appliedCoupon.value}%` : `${appliedCoupon.value.toLocaleString()}đ`}</span>
+                </div>
+              )}
+
+              <div className="pt-4 mt-4 border-t border-gray-50">
+                {!appliedCoupon ? (
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      value={couponCode}
+                      onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
+                      placeholder="MÃ GIẢM GIÁ"
+                      className="flex-1 h-12 px-4 rounded-xl border border-gray-200 focus:border-indigo-600 outline-none transition-all text-xs font-black"
+                    />
+                    <button
+                      onClick={handleApplyCoupon}
+                      disabled={couponLoading || !couponCode}
+                      className="px-6 h-12 bg-gray-900 text-white rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-indigo-600 transition-all disabled:opacity-50"
+                    >
+                      {couponLoading ? '...' : t('cart.apply')}
+                    </button>
+                  </div>
+                ) : (
+                  <div className="bg-emerald-50 p-4 rounded-2xl border border-emerald-100 flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center shadow-sm">
+                        <span className="text-emerald-500">🏷️</span>
+                      </div>
+                      <div className="flex flex-col">
+                        <span className="text-[10px] font-black text-gray-400 uppercase leading-none mb-1">Đã áp dụng mã</span>
+                        <span className="text-xs font-black text-emerald-700 uppercase leading-none">{appliedCoupon.code}</span>
+                      </div>
+                    </div>
+                    <button onClick={handleRemoveCoupon} className="text-[10px] font-black text-rose-500 uppercase tracking-widest hover:underline">Gỡ bỏ</button>
+                  </div>
+                )}
               </div>
 
               <div className="pt-8 border-t border-gray-100 flex justify-between items-center">
@@ -317,7 +389,6 @@ const CheckOut = () => {
             </div>
           </div>
         </div>
-
       </div>
     </div>
   );

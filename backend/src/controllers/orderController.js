@@ -2,18 +2,7 @@ const Order = require('../models/Order');
 const Product = require('../models/Product');
 const Cart = require('../models/Cart');
 const asyncHandler = require('express-async-handler');
-const nodemailer = require('nodemailer');
-
-// Configure email transporter (using env variables)
-const transporter = nodemailer.createTransport({
-    host: process.env.EMAIL_HOST || 'smtp.gmail.com',
-    port: process.env.EMAIL_PORT || 587,
-    secure: false,
-    auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS
-    }
-});
+const { sendOrderConfirmation } = require('../utils/emailService');
 
 // @desc    Create new order
 // @route   POST /api/orders
@@ -72,9 +61,11 @@ const createOrder = asyncHandler(async (req, res) => {
 
     // Calculate discount
     let discount = 0;
-    if (coupon && coupon.code) {
-        // TODO: Validate coupon from database when Coupon model is implemented
-        discount = coupon.discount || 0;
+    if (coupon) {
+        // Basic validation for now, could be expanded to query DB if Coupon object passed from FE
+        if (typeof coupon === 'object') {
+            discount = coupon.discount || 0;
+        }
     }
 
     // Calculate total
@@ -110,24 +101,8 @@ const createOrder = asyncHandler(async (req, res) => {
     // Clear user's cart
     await Cart.findOneAndDelete({ user: req.user._id });
 
-    // Send order confirmation email
-    if (process.env.EMAIL_USER && process.env.EMAIL_PASS) {
-        try {
-            await transporter.sendMail({
-                from: process.env.EMAIL_USER,
-                to: req.user.email,
-                subject: `Xác nhận đơn hàng #${order.orderNumber}`,
-                html: `
-          <h2>Cảm ơn bạn đã đặt hàng!</h2>
-          <p>Mã đơn hàng: <strong>${order.orderNumber}</strong></p>
-          <p>Tổng tiền: <strong>${total.toLocaleString('vi-VN')} VNĐ</strong></p>
-          <p>Chúng tôi sẽ liên hệ với bạn sớm nhất.</p>
-        `
-            });
-        } catch (error) {
-            console.error('Error sending email:', error);
-        }
-    }
+    // Send order confirmation email using professional service
+    await sendOrderConfirmation(order, req.user);
 
     res.status(201).json({
         status: 'success',

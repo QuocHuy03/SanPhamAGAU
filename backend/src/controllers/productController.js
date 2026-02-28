@@ -490,6 +490,34 @@ const deleteProductReview = asyncHandler(async (req, res) => {
     });
 });
 
+// @desc    Get search suggestions
+// @route   GET /api/products/search/suggestions
+// @access  Public
+const getSearchSuggestions = asyncHandler(async (req, res) => {
+    const { q } = req.query;
+
+    if (!q) {
+        return res.json({ status: 'success', data: { products: [] } });
+    }
+
+    const products = await Product.find({
+        status: 'active',
+        $or: [
+            { name: { $regex: q, $options: 'i' } },
+            { brand: { $regex: q, $options: 'i' } }
+        ]
+    })
+        .select('name price discountPrice images slug')
+        .limit(5);
+
+    res.json({
+        status: 'success',
+        data: {
+            products
+        }
+    });
+});
+
 module.exports = {
     getProducts,
     getProductById,
@@ -501,5 +529,6 @@ module.exports = {
     deleteProduct,
     uploadProductImages,
     addProductReview,
-    deleteProductReview
+    deleteProductReview,
+    getSearchSuggestions
 };

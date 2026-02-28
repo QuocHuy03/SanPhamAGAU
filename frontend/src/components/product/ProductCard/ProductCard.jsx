@@ -1,15 +1,47 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { useDispatch } from 'react-redux';
-import { FaStar, FaShoppingCart, FaRegHeart } from 'react-icons/fa';
+import { FaStar, FaShoppingCart, FaRegHeart, FaHeart, FaRegEye } from 'react-icons/fa';
 import { addToCart } from '../../../store/slices/cartSlice';
+import { addToWishlist, removeFromWishlist } from '../../../store/slices/wishlistSlice';
 import { formatCurrency } from '../../../utils/helpers';
+import { useSelector, useDispatch } from 'react-redux';
 import { message } from 'antd';
+import QuickViewModal from '../QuickViewModal/QuickViewModal';
 
 const ProductCard = ({ product }) => {
   const dispatch = useDispatch();
   const [selectedColor, setSelectedColor] = useState(product.colors?.[0] || null);
   const [selectedSize, setSelectedSize] = useState(product.sizes?.[0] || null);
+  const [isQuickViewVisible, setIsQuickViewVisible] = useState(false);
+
+  const { items: wishlistItems } = useSelector(state => state.wishlist);
+  const { user } = useSelector(state => state.auth);
+
+  const isInWishlist = wishlistItems.some(item =>
+    (item._id || item) === (product._id || product.id)
+  );
+
+  const toggleWishlist = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    if (!user) {
+      message.error('Vui lòng đăng nhập để lưu yêu thích');
+      return;
+    }
+
+    if (isInWishlist) {
+      dispatch(removeFromWishlist(product._id || product.id));
+    } else {
+      dispatch(addToWishlist(product._id || product.id));
+    }
+  };
+
+  const handleQuickView = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsQuickViewVisible(true);
+  };
 
   const handleAddToCart = (e) => {
     e.preventDefault();
@@ -46,9 +78,22 @@ const ProductCard = ({ product }) => {
           </span>
         )}
 
-        <button className="absolute top-4 right-4 w-10 h-10 bg-white/90 backdrop-blur-md rounded-full text-gray-400 hover:text-rose-500 shadow-xl transition-all z-10 opacity-0 group-hover:opacity-100 translate-x-4 group-hover:translate-x-0 duration-500 flex items-center justify-center">
-          <FaRegHeart className="w-4 h-4" />
-        </button>
+        <div className="absolute top-4 right-4 flex flex-col gap-2 z-10 opacity-0 group-hover:opacity-100 translate-x-4 group-hover:translate-x-0 transition-all duration-500">
+          <button
+            onClick={toggleWishlist}
+            className={`w-10 h-10 rounded-full flex items-center justify-center shadow-xl transition-all backdrop-blur-md ${isInWishlist ? 'bg-rose-500 text-white' : 'bg-white/90 text-gray-400 hover:text-rose-500'
+              }`}
+          >
+            {isInWishlist ? <FaHeart className="w-4 h-4" /> : <FaRegHeart className="w-4 h-4" />}
+          </button>
+
+          <button
+            onClick={handleQuickView}
+            className="w-10 h-10 bg-white/90 backdrop-blur-md rounded-full text-gray-400 hover:text-indigo-600 flex items-center justify-center shadow-xl transition-all"
+          >
+            <FaRegEye className="w-4 h-4" />
+          </button>
+        </div>
 
         {/* Quick Select Overlay (Simplified) */}
         <div className="absolute bottom-0 left-0 right-0 p-4 translate-y-full group-hover:translate-y-0 transition-transform duration-500 bg-gradient-to-t from-black/60 to-transparent">
@@ -61,8 +106,8 @@ const ProductCard = ({ product }) => {
                     key={size}
                     onClick={(e) => { e.preventDefault(); setSelectedSize(size); }}
                     className={`min-w-[30px] h-7 px-1 text-[9px] font-black rounded-lg transition-all border ${selectedSize === size
-                        ? 'bg-white text-gray-900 border-white shadow-lg'
-                        : 'bg-black/30 text-white border-white/20 hover:bg-black/50'
+                      ? 'bg-white text-gray-900 border-white shadow-lg'
+                      : 'bg-black/30 text-white border-white/20 hover:bg-black/50'
                       }`}
                   >
                     {size}
@@ -104,8 +149,8 @@ const ProductCard = ({ product }) => {
                 key={typeof color === 'string' ? color : color.name}
                 onClick={() => setSelectedColor(color)}
                 className={`w-4 h-4 rounded-full border-2 transition-all p-0.5 ${(typeof selectedColor === 'string' ? selectedColor === color : selectedColor?.name === color.name)
-                    ? 'border-indigo-600 scale-125 shadow-md'
-                    : 'border-transparent hover:scale-110'
+                  ? 'border-indigo-600 scale-125 shadow-md'
+                  : 'border-transparent hover:scale-110'
                   }`}
                 title={typeof color === 'string' ? color : color.name}
               >
@@ -149,6 +194,12 @@ const ProductCard = ({ product }) => {
           </button>
         </div>
       </div>
+
+      <QuickViewModal
+        visible={isQuickViewVisible}
+        onCancel={() => setIsQuickViewVisible(false)}
+        product={product}
+      />
     </div>
   );
 };

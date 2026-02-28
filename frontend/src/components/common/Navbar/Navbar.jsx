@@ -4,7 +4,6 @@ import { useTranslation } from 'react-i18next';
 import { categoryService } from '../../../services/categoryService';
 
 const Navbar = () => {
-  const { t } = useTranslation();
   const location = useLocation();
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);

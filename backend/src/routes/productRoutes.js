@@ -11,7 +11,8 @@ const {
     deleteProduct,
     uploadProductImages,
     addProductReview,
-    deleteProductReview
+    deleteProductReview,
+    getSearchSuggestions
 } = require('../controllers/productController');
 const { protect, admin } = require('../middleware/authMiddleware');
 const upload = require('../config/multerConfig');
@@ -19,6 +20,7 @@ const upload = require('../config/multerConfig');
 // Public routes
 router.get('/', getProducts);
 router.get('/featured', getFeaturedProducts);
+router.get('/search/suggestions', getSearchSuggestions);
 router.get('/slug/:slug', getProductBySlug);
 router.get('/:id', getProductById);
 router.get('/:id/related', getRelatedProducts);

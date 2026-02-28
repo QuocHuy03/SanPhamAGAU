@@ -36,11 +36,10 @@ const AdminOrders = () => {
     pageSize: 10,
     total: 0
   });
-  const navigate = useNavigate();
 
   useEffect(() => {
     fetchOrders();
-  }, [pagination.current, pagination.pageSize, selectedStatus, selectedDate, searchTerm]);
+  }, [fetchOrders, pagination.current, pagination.pageSize, selectedStatus, selectedDate, searchTerm]);
 
   const fetchOrders = async () => {
     try {

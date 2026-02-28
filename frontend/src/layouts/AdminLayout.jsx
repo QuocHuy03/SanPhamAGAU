@@ -12,6 +12,7 @@ import {
   LogoutOutlined,
   MenuFoldOutlined,
   MenuUnfoldOutlined,
+  GiftOutlined,
 } from '@ant-design/icons';
 import { logout } from '../store/slices/authSlice';
 
@@ -72,6 +73,11 @@ const AdminLayout = () => {
       label: <Link to="/admin/categories">Danh mục</Link>,
     },
     {
+      key: '/admin/coupons',
+      icon: <GiftOutlined />,
+      label: <Link to="/admin/coupons">Mã giảm giá</Link>,
+    },
+    {
       key: '/admin/settings',
       icon: <SettingOutlined />,
       label: <Link to="/admin/settings">Cài đặt</Link>,
@@ -103,6 +109,7 @@ const AdminLayout = () => {
     if (path.startsWith('/admin/orders')) return '/admin/orders';
     if (path.startsWith('/admin/users')) return '/admin/users';
     if (path.startsWith('/admin/categories')) return '/admin/categories';
+    if (path.startsWith('/admin/coupons')) return '/admin/coupons';
     if (path.startsWith('/admin/settings')) return '/admin/settings';
     return '/admin/dashboard';
   };

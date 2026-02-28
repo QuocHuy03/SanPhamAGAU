@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { Row, Col, Card, Statistic, Table, Typography, Tag, Space, Button, Modal, Divider, List, Avatar, message } from 'antd';
 import {
   ShoppingOutlined,
@@ -30,7 +30,6 @@ const AdminDashboard = () => {
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [modalLoading, setModalLoading] = useState(false);
-  const navigate = useNavigate();
 
   useEffect(() => {
     fetchDashboardData();

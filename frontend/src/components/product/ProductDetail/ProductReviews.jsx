@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
-import { FaStar, FaUserCircle, FaPaperPlane } from 'react-icons/fa';
+import { FaUserCircle, FaPaperPlane } from 'react-icons/fa';
 import { Rate, message, Button, Input, Progress, Avatar } from 'antd';
 import format from 'date-fns/format';
 import { vi } from 'date-fns/locale';

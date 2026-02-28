@@ -39,7 +39,7 @@ const getStatusInfo = (status, t) => {
 const Orders = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const { user, isAuthenticated } = useSelector((state) => state.auth);
+  const { isAuthenticated } = useSelector((state) => state.auth);
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedOrder, setSelectedOrder] = useState(null);
@@ -51,7 +51,7 @@ const Orders = () => {
       return;
     }
     fetchOrders();
-  }, [isAuthenticated]);
+  }, [isAuthenticated, navigate]);
 
   const fetchOrders = async () => {
     try {
